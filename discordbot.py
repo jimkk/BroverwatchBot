@@ -39,7 +39,7 @@ def on_message(message):
         elif message.content.startswith('!joinvoice'):
             if message.author.voice_channel == None:
                 yield from client.send_message(message.channel,
-                '@' + message.author.name + 'You are not in a voice channel')
+                message.author.mention + ' You are not in a voice channel')
             else:
                 yield from client.join_voice_channel(message.author.voice_channel)
         elif message.content.startswith('!leavevoice'):
