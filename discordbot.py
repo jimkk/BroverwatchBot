@@ -59,12 +59,12 @@ def on_voice_state_update(before, after):
     global tts_flag
     global enabled
     if enabled:
-        if(before.voice_channel == None and after.voice_channel != None and after.name != client.user.name):
-            message = after.name + ' has joined voice channel ' + after.voice_channel.name 
-            yield from client.send_message(after.server, message, tts=tts_flag)
-        if(before.voice_channel != None and after.voice_channel == None and before.name != client.user.name):
-            message = before.name + ' has left voice channel ' + before.voice_channel.name
-            yield from client.send_message(after.server, message, tts=tts_flag)
+        #if(before.voice_channel == None and after.voice_channel != None and after.name != client.user.name):
+        #    message = after.name + ' has joined voice channel ' + after.voice_channel.name 
+        #    yield from client.send_message(after.server, message, tts=tts_flag)
+        #if(before.voice_channel != None and after.voice_channel == None and before.name != client.user.name):
+        #    message = before.name + ' has left voice channel ' + before.voice_channel.name
+        #    yield from client.send_message(after.server, message, tts=tts_flag)
         if client.is_voice_connected(after.server):
             voice_client = client.voice_client_in(after.server)
             if voice_client.channel == after.voice_channel:
@@ -78,12 +78,16 @@ def on_voice_state_update(before, after):
         if client.is_voice_connected(before.server):
             voice_client = client.voice_client_in(before.server)
             if voice_client.channel == before.voice_channel:
-                f = NamedTemporaryFile()
+                #f = NamedTemporaryFile()
+                print(os.path.isfile('tts.mp3'))
+                while os.path.isfile('tts.mp3'):
+                    print("Waiting for turn for voice")
+                    yield from asyncio.sleep(4)
                 tts = gTTS(text=after.name + ' has left the voice channel', lang='en')
                 tts.save('tts.mp3')
                 stream_player = voice_client.create_ffmpeg_player('tts.mp3', use_avconv=True)
                 stream_player.start()
-                yield from asyncio.sleep(5)
+                yield from asyncio.sleep(1)
                 os.remove('tts.mp3')
 
 if(os.environ.get('DISCORD_TOKEN') == None):
