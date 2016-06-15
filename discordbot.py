@@ -6,10 +6,13 @@ from tempfile import NamedTemporaryFile
 import os
 
 client = discord.Client()
+player_lock = asyncio.Lock()
+tts_lock = asyncio.Lock()
 
-enabled = False
+enabled = True
 message_channel = None
 tts_flag = False
+use_avconv = False
 
 @client.event
 @asyncio.coroutine
@@ -26,10 +29,16 @@ def on_message(message):
     global tts_flag
     global enabled
 
-    if message.content.startswith("!gogogadgetbot"):
+    if message.content.startswith('!gogogadgetbot'):
         yield from client.send_message(message.channel, 'It\'s a me, Broverwatch Bot!')
         enabled = True
-    if enabled:
+    elif enabled:
+        if message.content.startswith('!readytowork'):
+            if message.author.voice_channel != None:
+                voice_client = yield from client.join_voice_channel(message.author.voice_channel)
+
+                yield from voice_clip(voice_client, 'res/audioclips/ready_to_work.mp3')
+                yield from voice_client.disconnect()
         if message.content.startswith('!shutup'):
             tts_flag = False
             yield from client.send_message(message.channel, 'I will go quietly into that good night')
@@ -45,9 +54,6 @@ def on_message(message):
         elif message.content.startswith('!leavevoice'):
             if client.is_voice_connected(message.server):
                 yield from client.voice_client_in(message.server).disconnect()
-        elif message.content.startswith('!sleep'):
-            yield from asyncio.sleep(5)
-            yield from client.send_message(message.channel, 'Done sleeping')
         elif message.content.startswith('!goaway'):
             yield from client.send_message(message.channel, 'Ok, going away')
             enabled = False
@@ -59,36 +65,31 @@ def on_voice_state_update(before, after):
     global tts_flag
     global enabled
     if enabled:
-        #if(before.voice_channel == None and after.voice_channel != None and after.name != client.user.name):
-        #    message = after.name + ' has joined voice channel ' + after.voice_channel.name 
-        #    yield from client.send_message(after.server, message, tts=tts_flag)
-        #if(before.voice_channel != None and after.voice_channel == None and before.name != client.user.name):
-        #    message = before.name + ' has left voice channel ' + before.voice_channel.name
-        #    yield from client.send_message(after.server, message, tts=tts_flag)
         if client.is_voice_connected(after.server):
             voice_client = client.voice_client_in(after.server)
             if voice_client.channel == after.voice_channel:
-                f = NamedTemporaryFile()
-                tts = gTTS(text=after.name + ' has joined the voice channel', lang='en')
-                tts.save('tts.mp3')
-                stream_player = voice_client.create_ffmpeg_player('tts.mp3', use_avconv=True)
-                stream_player.start()
-                yield from asyncio.sleep(5)
-                os.remove('tts.mp3')
+                yield from tts_voice_clip(voice_client, after.name + ' has joined the voice channel')
         if client.is_voice_connected(before.server):
             voice_client = client.voice_client_in(before.server)
             if voice_client.channel == before.voice_channel:
-                #f = NamedTemporaryFile()
-                print(os.path.isfile('tts.mp3'))
-                while os.path.isfile('tts.mp3'):
-                    print("Waiting for turn for voice")
-                    yield from asyncio.sleep(4)
-                tts = gTTS(text=after.name + ' has left the voice channel', lang='en')
-                tts.save('tts.mp3')
-                stream_player = voice_client.create_ffmpeg_player('tts.mp3', use_avconv=True)
-                stream_player.start()
-                yield from asyncio.sleep(1)
-                os.remove('tts.mp3')
+                yield from tts_voice_clip(voice_client, after.name + ' has left the voice channel')
+
+def voice_clip(voice_client, filename):
+    global use_avconv
+    with(yield from player_lock):
+        player = voice_client.create_ffmpeg_player(filename, use_avconv=use_avconv)
+        player.start()
+        while not player.is_done():
+            yield from asyncio.sleep(1)
+
+def tts_voice_clip(voice_client, text):
+    with(yield from tts_lock):
+        tts = gTTS(text=text, lang='en')
+        tts.save('tts.mp3')
+        yield from voice_clip(voice_client, 'tts.mp3')
+        os.remove('tts.mp3')
+    
+        
 
 if(os.environ.get('DISCORD_TOKEN') == None):
     token = input("You must specify the discord bot token: ")
