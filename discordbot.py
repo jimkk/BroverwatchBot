@@ -39,7 +39,7 @@ def on_message(message):
     if (message.content.startswith('!gogogadgetbot') or message.content.startswith('!bbon')):
         yield from client.send_message(message.channel, 'It\'s a me, Broverwatch Bot!')
         enabled = True
-    elif (message.content.startswith('!bbhelp') or message.content.startswith('!bb')):
+    elif (message.content.startswith('!bbhelp') or message.content.startswith('!bb ') or message.content == '!bb'):
             yield from client.send_message(message.channel, helpmsg)
     elif enabled:
         if message.content.startswith('!readytowork'):
