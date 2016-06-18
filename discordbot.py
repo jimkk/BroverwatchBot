@@ -4,8 +4,10 @@ import time
 from gtts import gTTS
 from tempfile import NamedTemporaryFile
 import os
+import pickle
 
 client = discord.Client()
+
 player_lock = asyncio.Lock()
 tts_lock = asyncio.Lock()
 
@@ -13,6 +15,9 @@ enabled = True
 message_channel = None
 tts_flag = False
 use_avconv = True
+
+nicknames = {}
+
 helpmsg = """ COMMAND LIST:
 >!bbhelp / !bb    -    Display help message
 >!bbon / !gogogadgetbot    -    Enable the bot
@@ -52,6 +57,12 @@ def on_message(message):
         elif (message.content.startswith('!speakup') or message.content.startswith('!bbunmute')):
             tts_flag = True
             yield from client.send_message(message.channel, 'I will not go quietly into that good night')
+        elif message.content.startswith('!bbnickname'):
+            if len(message.content.split(' ')) < 2:
+                yield from client.send_message(message.channel, 'Bad formatting: !bbnickname <nickname>')
+            else:
+                requested_nickname = message.content.split(' ')[1]
+                nicknames[message.author.id] = requested_nickname
         elif (message.content.startswith('!joinvoice') or message.content.startswith('!bbjoin')):
             if message.author.voice_channel == None:
                 yield from client.send_message(message.channel,
@@ -75,11 +86,17 @@ def on_voice_state_update(before, after):
         if client.is_voice_connected(after.server):
             voice_client = client.voice_client_in(after.server)
             if voice_client.channel == after.voice_channel:
-                yield from tts_voice_clip(voice_client, after.name + ' has joined the voice channel')
+                if(after.id in nicknames):
+                    yield from tts_voice_clip(voice_client, nicknames[after.id] + ' has joined the voice channel')
+                else:
+                    yield from tts_voice_clip(voice_client, after.name + ' has joined the voice channel')
         if client.is_voice_connected(before.server):
             voice_client = client.voice_client_in(before.server)
             if voice_client.channel == before.voice_channel:
-                yield from tts_voice_clip(voice_client, after.name + ' has left the voice channel')
+                if before.id in nicknames:
+                    yield from tts_voice_clip(voice_client, nicknames[before.id] + ' has joined the voice channel')
+                else:
+                    yield from tts_voice_clip(voice_client, after.name + ' has left the voice channel')
                 
 def say(message):
     if(len(message.content.split(' ')) == 1):
