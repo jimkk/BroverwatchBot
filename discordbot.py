@@ -84,7 +84,7 @@ def say(message):
     filename = 'res/audioclips/' + message.split(' ')[1] + '.mp3'
     if os.path.isfile(filename) == False:
         yield from client.send_message(message.channel, 'Voice clip not found. RIP.')
-    else if message.author.voice_channel != None and client.voice_client_in(message.server) == None: #author is in vchat bot isnt
+    elif message.author.voice_channel != None and client.voice_client_in(message.server) == None: #author is in vchat bot isnt
         voice_client = yield from client.join_voice_channel(message.author.voice_channel)
 
         yield from voice_clip(voice_client, filename)
