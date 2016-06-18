@@ -20,7 +20,8 @@ helpmsg = """ COMMAND LIST:
 >!bbunmute / !speakup    -    Enable TTS
 >!bbjoin / !joinvoice    -    Invite bot to current vchat
 >!bbleave / !leavevoice    -    Remove bot from vchat
->!bboff / !goaway    -    Disable the bot"""
+>!bboff / !goaway    -    Disable the bot
+>!bbsay <line>    -    Say a line in current channel"""
 
 @client.event
 @asyncio.coroutine
