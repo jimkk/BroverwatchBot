@@ -44,7 +44,7 @@ def on_message(message):
             yield from client.send_message(message.channel, helpmsg)
     elif enabled:
         if message.content.startswith('!bbsay'):
-            say(message)           
+            yield from say(message)           
         if (message.content.startswith('!shutup') or message.content.startswith('!bbmute')):
             tts_flag = False
             yield from client.send_message(message.channel, 'I will go quietly into that good night')
