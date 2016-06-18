@@ -20,7 +20,8 @@ helpmsg = """ COMMAND LIST:
 >!bbunmute / !speakup    -    Enable TTS
 >!bbjoin / !joinvoice    -    Invite bot to current vchat
 >!bbleave / !leavevoice    -    Remove bot from vchat
->!bboff / !goaway    -    Disable the bot"""
+>!bboff / !goaway    -    Disable the bot
+>!bbsay <line>    -    Say a line in current channel"""
 
 @client.event
 @asyncio.coroutine
@@ -43,22 +44,8 @@ def on_message(message):
     elif (message.content.startswith('!bbhelp') or message.content.startswith('!bb ') or message.content == '!bb'):
             yield from client.send_message(message.channel, helpmsg)
     elif enabled:
-        if message.content.startswith('!readytowork'):
-            if message.author.voice_channel != None and client.voice_client_in(message.server) == None: #author is in vchat bot isnt
-                voice_client = yield from client.join_voice_channel(message.author.voice_channel)
-
-                yield from voice_clip(voice_client, 'res/audioclips/ready_to_work.mp3')
-                yield from voice_client.disconnect()
-            elif message.author.voice_channel != None and client.voice_client_in(message.server) == message.author.voice_channel: #both in same voice chat
-                voice_client = client.voice_client_in(message.server)
-                yield from voice_clip(voice_client, 'res/audioclips/ready_to_work.mp3')
-            elif message.author.voice_channel != None and client.voice_client_in(message.server) != message.author.voice_channel: #both in different voice chat
-                voice_client = client.voice_client_in(message.server)
-                prev_channel = voice_client.channel
-                yield from voice_client.move_to(message.author.voice_channel);
-
-                yield from voice_clip(voice_client, 'res/audioclips/ready_to_work.mp3')
-                yield from voice_client.move_to(prev_channel);
+        if message.content.startswith('!bbsay'):
+            yield from say(message)           
         if (message.content.startswith('!shutup') or message.content.startswith('!bbmute')):
             tts_flag = False
             yield from client.send_message(message.channel, 'I will go quietly into that good night')
@@ -93,6 +80,30 @@ def on_voice_state_update(before, after):
             voice_client = client.voice_client_in(before.server)
             if voice_client.channel == before.voice_channel:
                 yield from tts_voice_clip(voice_client, after.name + ' has left the voice channel')
+                
+def say(message):
+    if(len(message.content.split(' ')) == 1):
+        yield from client.send_message(message.channel, 'Please give a voice line: \"!bbsay <voiceline>\"')
+        return
+
+    filename = 'res/audioclips/' + message.content.split(' ')[1] + '.mp3'
+    if os.path.isfile(filename) == False:
+        yield from client.send_message(message.channel, 'Voice clip not found. RIP.')
+    elif message.author.voice_channel != None and client.voice_client_in(message.server) == None: #author is in vchat bot isnt
+        voice_client = yield from client.join_voice_channel(message.author.voice_channel)
+
+        yield from voice_clip(voice_client, filename)
+        yield from voice_client.disconnect()
+    elif message.author.voice_channel != None and client.voice_client_in(message.server) == message.author.voice_channel: #both in same voice chat
+        voice_client = client.voice_client_in(message.server)
+        yield from voice_clip(voice_client, filename)
+    elif message.author.voice_channel != None and client.voice_client_in(message.server) != message.author.voice_channel: #both in different voice chat
+        voice_client = client.voice_client_in(message.server)
+        prev_channel = voice_client.channel
+        yield from voice_client.move_to(message.author.voice_channel);
+
+        yield from voice_clip(voice_client, filename)
+        yield from voice_client.move_to(prev_channel);
 
 def voice_clip(voice_client, filename):
     global use_avconv
