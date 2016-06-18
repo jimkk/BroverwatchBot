@@ -26,7 +26,8 @@ helpmsg = """ COMMAND LIST:
 >!bbjoin / !joinvoice    -    Invite bot to current vchat
 >!bbleave / !leavevoice    -    Remove bot from vchat
 >!bboff / !goaway    -    Disable the bot
->!bbsay <line>    -    Say a line in current channel"""
+>!bbsay <line>    -    Say a line in current channel
+>!bbnickname <nickname>    -    Set TTS nickname"""
 
 @client.event
 @asyncio.coroutine
