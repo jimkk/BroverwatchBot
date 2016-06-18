@@ -35,6 +35,7 @@ def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
+    load_nicknames()
 
 @client.event
 @asyncio.coroutine
@@ -61,9 +62,10 @@ def on_message(message):
             if len(message.content.split(' ')) < 2:
                 yield from client.send_message(message.channel, 'Bad formatting: !bbnickname <nickname>')
             else:
-                requested_nickname = message.content[11:]
+                requested_nickname = message.content[12:]
                 set_nickname(message.author, requested_nickname)
-                yield from client.send_message(message.channel, message.author.mention + ' your nickname is now ' + requested_nickname)
+                if requested_nickname != 'reset':
+                    yield from client.send_message(message.channel, message.author.mention + ' your nickname is now ' + requested_nickname)
         elif (message.content.startswith('!joinvoice') or message.content.startswith('!bbjoin')):
             if message.author.voice_channel == None:
                 yield from client.send_message(message.channel,
@@ -134,9 +136,9 @@ def voice_clip(voice_client, filename):
 def tts_voice_clip(voice_client, text):
     with(yield from tts_lock):
         tts = gTTS(text=text, lang='en')
-        tts.save('tts.mp3')
-        yield from voice_clip(voice_client, 'tts.mp3')
-        os.remove('tts.mp3')
+        tts.save('data/tts.mp3')
+        yield from voice_clip(voice_client, 'data/tts.mp3')
+        os.remove('data/tts.mp3')
 
 def set_nickname(user, nickname):
     global nicknames
@@ -144,18 +146,21 @@ def set_nickname(user, nickname):
         del nicknames[user.id]
     else:
         nicknames[user.id] = nickname
-    pkl_file = open('nicknames.pkl', 'wb')
+    pkl_file = open('data/nicknames.pkl', 'wb')
     pickle.dump(nicknames, pkl_file)
     pkl_file.close()
-        
+
+def load_nicknames():
+    global nicknames
+    if(os.path.isfile('data/nicknames.pkl') == True):
+        pkl_file = open('data/nicknames.pkl', 'rb')
+        nicknames = pickle.load(pkl_file)
+        pkl_file.close()
+            
 
 if(os.environ.get('DISCORD_TOKEN') == None):
     token = input("You must specify the discord bot token: ")
     os.environ['DISCORD_TOKEN'] = token
 
-if(os.path.isfile('nicknames.pkl' == True)):
-    pkl_file = open('nicknames.pkl', 'rb')
-    nicknames = pickle.load(pkl_file)
-    pkl_file.close()
 
 client.run(os.environ.get('DISCORD_TOKEN'))
