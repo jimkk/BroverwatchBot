@@ -61,8 +61,9 @@ def on_message(message):
             if len(message.content.split(' ')) < 2:
                 yield from client.send_message(message.channel, 'Bad formatting: !bbnickname <nickname>')
             else:
-                requested_nickname = message.content.split(' ')[1]
-                nicknames[message.author.id] = requested_nickname
+                requested_nickname = message.content[11:]
+                yield from set_nickname(message.author, requested_nickname)
+                yield from client.send_message(message.channel, message.author.mention + ' your nickname is now ' + requested_nickname)
         elif (message.content.startswith('!joinvoice') or message.content.startswith('!bbjoin')):
             if message.author.voice_channel == None:
                 yield from client.send_message(message.channel,
@@ -136,10 +137,24 @@ def tts_voice_clip(voice_client, text):
         tts.save('tts.mp3')
         yield from voice_clip(voice_client, 'tts.mp3')
         os.remove('tts.mp3')
-    
+
+def set_nickname(user, nickname):
+    if nickname == 'reset':
+        del nicknames[user.id]
+    else:
+        nicknames[user.id] = nickname
+    pkl_file = open('nicknames.pkl', 'wb')
+    pickle.dump(nicknames, pkl_file)
+    pkl_file.close()
         
 
 if(os.environ.get('DISCORD_TOKEN') == None):
     token = input("You must specify the discord bot token: ")
     os.environ['DISCORD_TOKEN'] = token
+
+if(os.path.isfile('nicknames.pkl' == True)):
+    pkl_file = open('nicknames.pkl', 'rb')
+    nicknames = pickle.load(pkl_file)
+    pkl_file.close()
+
 client.run(os.environ.get('DISCORD_TOKEN'))
