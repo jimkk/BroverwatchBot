@@ -62,7 +62,7 @@ def on_message(message):
                 yield from client.send_message(message.channel, 'Bad formatting: !bbnickname <nickname>')
             else:
                 requested_nickname = message.content[11:]
-                yield from set_nickname(message.author, requested_nickname)
+                set_nickname(message.author, requested_nickname)
                 yield from client.send_message(message.channel, message.author.mention + ' your nickname is now ' + requested_nickname)
         elif (message.content.startswith('!joinvoice') or message.content.startswith('!bbjoin')):
             if message.author.voice_channel == None:
@@ -139,6 +139,7 @@ def tts_voice_clip(voice_client, text):
         os.remove('tts.mp3')
 
 def set_nickname(user, nickname):
+    global nicknames
     if nickname == 'reset':
         del nicknames[user.id]
     else:
