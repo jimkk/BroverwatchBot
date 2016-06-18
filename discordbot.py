@@ -58,7 +58,7 @@ def on_message(message):
                 yield from voice_client.move_to(message.author.voice_channel);
 
                 yield from voice_clip(voice_client, 'res/audioclips/ready_to_work.mp3')
-                yield from voice_client.voice_client.move_to(prev_channel);
+                yield from voice_client.move_to(prev_channel);
         if (message.content.startswith('!shutup') or message.content.startswith('!bbmute')):
             tts_flag = False
             yield from client.send_message(message.channel, 'I will go quietly into that good night')
@@ -84,7 +84,7 @@ def on_voice_state_update(before, after):
     global message_channel
     global tts_flag
     global enabled
-    if enabled:
+    if enabled and not client.user == before: #the updated user is not the bot
         if client.is_voice_connected(after.server):
             voice_client = client.voice_client_in(after.server)
             if voice_client.channel == after.voice_channel:
