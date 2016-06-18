@@ -93,16 +93,16 @@ def on_voice_state_update(before, after):
             voice_client = client.voice_client_in(after.server)
             if voice_client.channel == after.voice_channel:
                 if(after.id in nicknames):
-                    yield from tts_voice_clip(voice_client, nicknames[after.id] + ' has joined the voice channel')
+                    yield from tts_voice_clip(voice_client, nicknames[after.id] + ' has joined')
                 else:
-                    yield from tts_voice_clip(voice_client, after.name + ' has joined the voice channel')
+                    yield from tts_voice_clip(voice_client, after.name + ' has joined')
         if client.is_voice_connected(before.server):
             voice_client = client.voice_client_in(before.server)
             if voice_client.channel == before.voice_channel:
                 if before.id in nicknames:
-                    yield from tts_voice_clip(voice_client, nicknames[before.id] + ' has joined the voice channel')
+                    yield from tts_voice_clip(voice_client, nicknames[before.id] + ' has left')
                 else:
-                    yield from tts_voice_clip(voice_client, after.name + ' has left the voice channel')
+                    yield from tts_voice_clip(voice_client, after.name + ' has left')
                 
 def say(message):
     if(len(message.content.split(' ')) == 1):
