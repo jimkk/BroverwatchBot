@@ -53,7 +53,7 @@ def on_message(message):
     elif enabled:
         if message.content.startswith('!bbsay'):
             yield from say(message)           
-        if (message.content.startswith('!shutup') or message.content.startswith('!bbmute')):
+        elif (message.content.startswith('!shutup') or message.content.startswith('!bbmute')):
             tts_flag = False
             yield from client.send_message(message.channel, 'I will go quietly into that good night')
         elif (message.content.startswith('!speakup') or message.content.startswith('!bbunmute')):
@@ -79,6 +79,8 @@ def on_message(message):
         elif (message.content.startswith('!goaway') or message.content.startswith('!bboff')):
             yield from client.send_message(message.channel, 'Ok, going away')
             enabled = False
+        elif (message.content.startswith('!bbmyson')):
+            yield from client.send_message(message.channel, 'Hello father! Here are the words I know! \n' + listlines())
 
 @client.event
 @asyncio.coroutine
@@ -126,6 +128,8 @@ def say(message):
         yield from voice_clip(voice_client, filename)
         yield from voice_client.move_to(prev_channel);
 
+def listlines():
+    return ' \\ '.join(x.replace('.mp3', '') for x in os.listdir("res/audioclips/"))
 def voice_clip(voice_client, filename):
     global use_avconv
     with(yield from player_lock):
