@@ -81,7 +81,7 @@ def on_voice_state_update(before, after):
                 yield from tts_voice_clip(voice_client, after.name + ' has left the voice channel')
                 
 def say(message):
-    filename = 'res/audioclips/' + message.split(' ')[1] + '.mp3'
+    filename = 'res/audioclips/' + message.content.split(' ')[1] + '.mp3'
     if os.path.isfile(filename) == False:
         yield from client.send_message(message.channel, 'Voice clip not found. RIP.')
     elif message.author.voice_channel != None and client.voice_client_in(message.server) == None: #author is in vchat bot isnt
