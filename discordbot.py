@@ -108,7 +108,7 @@ def say(message):
         yield from voice_client.move_to(prev_channel);
 
 def listlines():
-    return ' \\ '.join(map(x.replace('.mp3', '') for x in os.listdir("res/audioclips/")))
+    return ' \\ '.join(x.replace('.mp3', '') for x in os.listdir("res/audioclips/"))
 def voice_clip(voice_client, filename):
     global use_avconv
     with(yield from player_lock):
