@@ -81,11 +81,10 @@ def on_voice_state_update(before, after):
                 yield from tts_voice_clip(voice_client, after.name + ' has left the voice channel')
                 
 def say(message):
-    if(len(message.content.split(' ')) == 1)
-    {
+    if(len(message.content.split(' ')) == 1):
         yield from client.send_message(message.channel, 'Please give a voice line: \"!bbsay <voiceline>\"')
         return
-    }
+
     filename = 'res/audioclips/' + message.content.split(' ')[1] + '.mp3'
     if os.path.isfile(filename) == False:
         yield from client.send_message(message.channel, 'Voice clip not found. RIP.')
