@@ -12,7 +12,7 @@ tts_lock = asyncio.Lock()
 enabled = True
 message_channel = None
 tts_flag = False
-use_avconv = False
+use_avconv = True
 helpmsg = """>!bbhelp / !bb    -    Display help message
 >!bbon / !gogogadgetbot    -    Enable the bot
 >!bbmute / !shutup    -    Disable TTS
