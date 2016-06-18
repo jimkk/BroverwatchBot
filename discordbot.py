@@ -12,8 +12,9 @@ tts_lock = asyncio.Lock()
 enabled = True
 message_channel = None
 tts_flag = False
-use_avconv = True
-helpmsg = """>!bbhelp / !bb    -    Display help message
+use_avconv = False
+helpmsg = """ COMMAND LIST:
+>!bbhelp / !bb    -    Display help message
 >!bbon / !gogogadgetbot    -    Enable the bot
 >!bbmute / !shutup    -    Disable TTS
 >!bbunmute / !speakup    -    Enable TTS
@@ -43,11 +44,21 @@ def on_message(message):
             yield from client.send_message(message.channel, helpmsg)
     elif enabled:
         if message.content.startswith('!readytowork'):
-            if message.author.voice_channel != None:
+            if message.author.voice_channel != None and client.voice_client_in(message.server) == None: #author is in vchat bot isnt
                 voice_client = yield from client.join_voice_channel(message.author.voice_channel)
 
                 yield from voice_clip(voice_client, 'res/audioclips/ready_to_work.mp3')
                 yield from voice_client.disconnect()
+            elif message.author.voice_channel != None and client.voice_client_in(message.server) == message.author.voice_channel: #both in same voice chat
+                voice_client = client.voice_client_in(message.server)
+                yield from voice_clip(voice_client, 'res/audioclips/ready_to_work.mp3')
+            elif message.author.voice_channel != None and client.voice_client_in(message.server) != message.author.voice_channel: #both in different voice chat
+                voice_client = client.voice_client_in(message.server)
+                prev_channel = voice_client.channel
+                yield from voice_client.move_to(message.author.voice_channel);
+
+                yield from voice_clip(voice_client, 'res/audioclips/ready_to_work.mp3')
+                yield from voice_client.voice_client.move_to(prev_channel);
         if (message.content.startswith('!shutup') or message.content.startswith('!bbmute')):
             tts_flag = False
             yield from client.send_message(message.channel, 'I will go quietly into that good night')
