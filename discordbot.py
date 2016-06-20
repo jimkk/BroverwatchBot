@@ -83,7 +83,8 @@ def on_message(message):
             yield from client.send_message(message.channel, 'Overwatch: \n' + listlines("res/audioclips/ow"))
             yield from client.send_message(message.channel, 'Wow: \n' + listlines("res/audioclips/wow"))
             yield from client.send_message(message.channel, 'Hearthstone: \n' + listlines("res/audioclips/hs"))
-
+        elif (message.content.startswith('!bbcleanup')):
+            yield from cleanup(message)
 @client.event
 @asyncio.coroutine
 def on_voice_state_update(before, after):
@@ -131,7 +132,7 @@ def say(message):
     if os.path.isfile(filename) == False:
         for x in os.listdir("res/audioclips/"):
             if x.startswith(message.content.split(' ')[1]):
-                filename = 'res/audioclips/hs/' + x
+                filename = 'res/audioclips/hs/s' + x
                 #yield from client.send_message(message.channel, filename)
                 break
     if os.path.isfile(filename) == False:
@@ -154,6 +155,7 @@ def say(message):
 
 def listlines(dir):
     return ' \\ '.join(x.replace('.mp3', '') for x in os.listdir(dir))
+
 def voice_clip(voice_client, filename):
     global use_avconv
     with(yield from player_lock):
@@ -186,6 +188,11 @@ def load_nicknames():
         nicknames = pickle.load(pkl_file)
         pkl_file.close()
             
+def cleanup(message):
+    yield from purge_from(message.channel, limit=100,check=isbbsay)
+
+def isbbsay(message):
+    yield from return message.startswith('!bbsay')
 
 if(os.environ.get('DISCORD_TOKEN') == None):
     token = input("You must specify the discord bot token: ")
