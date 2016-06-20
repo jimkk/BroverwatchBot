@@ -80,7 +80,9 @@ def on_message(message):
             yield from client.send_message(message.channel, 'Ok, going away')
             enabled = False
         elif (message.content.startswith('!bbmyson')):
-            yield from client.send_message(message.channel, 'Hello father! Here are the words I know! \n' + listlines())
+            yield from client.send_message(message.channel, 'Overwatch: \n' + listlines("res/audioclips/ow"))
+            yield from client.send_message(message.channel, 'Wow: \n' + listlines("res/audioclips/wow"))
+            yield from client.send_message(message.channel, 'Hearthstone: \n' + listlines("res/audioclips/hs"))
 
 @client.event
 @asyncio.coroutine
@@ -111,14 +113,27 @@ def say(message):
         yield from client.send_message(message.channel, 'Please give a voice line: \"!bbsay <voiceline>\"')
         return
 
-    filename = 'res/audioclips/' + message.content.split(' ')[1] + '.mp3'
+    filename = 'res/audioclips/ow/' + message.content.split(' ')[1] + '.mp3'
     if os.path.isfile(filename) == False:
         for x in os.listdir("res/audioclips/"):
             if x.startswith(message.content.split(' ')[1]):
-                filename = 'res/audioclips/' + x
+                filename = 'res/audioclips/ow/' + x
                 #yield from client.send_message(message.channel, filename)
                 break
-
+    filename = 'res/audioclips/wow/' + message.content.split(' ')[1] + '.mp3'
+    if os.path.isfile(filename) == False:
+        for x in os.listdir("res/audioclips/"):
+            if x.startswith(message.content.split(' ')[1]):
+                filename = 'res/audioclips/wow' + x
+                #yield from client.send_message(message.channel, filename)
+                break
+    filename = 'res/audioclips/hs/' + message.content.split(' ')[1] + '.mp3'
+    if os.path.isfile(filename) == False:
+        for x in os.listdir("res/audioclips/"):
+            if x.startswith(message.content.split(' ')[1]):
+                filename = 'res/audioclips/hs/' + x
+                #yield from client.send_message(message.channel, filename)
+                break
     if os.path.isfile(filename) == False:
         yield from client.send_message(message.channel, 'Voice clip not found. RIP.')
     elif message.author.voice_channel != None and client.voice_client_in(message.server) == None: #author is in vchat bot isnt
@@ -137,8 +152,8 @@ def say(message):
         yield from voice_clip(voice_client, filename)
         yield from voice_client.move_to(prev_channel);
 
-def listlines():
-    return ' \\ '.join(x.replace('.mp3', '') for x in os.listdir("res/audioclips/"))
+def listlines(dir):
+    return ' \\ '.join(x.replace('.mp3', '') for x in os.listdir(dir))
 def voice_clip(voice_client, filename):
     global use_avconv
     with(yield from player_lock):
