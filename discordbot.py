@@ -126,14 +126,14 @@ def say(message):
     if os.path.isfile(filename) == False:
         for x in os.listdir("res/audioclips/"):
             if x.startswith(message.content.split(' ')[1]):
-                filename = 'res/audioclips/wow' + x
+                filename = 'res/audioclips/wow/' + x
                 #yield from client.send_message(message.channel, filename)
                 break
     filename = 'res/audioclips/hs/' + message.content.split(' ')[1] + '.mp3'
     if os.path.isfile(filename) == False:
         for x in os.listdir("res/audioclips/"):
             if x.startswith(message.content.split(' ')[1]):
-                filename = 'res/audioclips/hs/s' + x
+                filename = 'res/audioclips/hs/' + x
                 #yield from client.send_message(message.channel, filename)
                 break
     if os.path.isfile(filename) == False:
