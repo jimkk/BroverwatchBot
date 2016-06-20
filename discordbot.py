@@ -111,33 +111,11 @@ def on_voice_state_update(before, after):
 def say(message):
     if(len(message.content.split(' ')) == 1):
         yield from client.send_message(message.channel, 'Please give a voice line: \"!bbsay <voiceline>\"')
-        return
-
-    filename = 'res/audioclips/ow/' + message.content.split(' ')[1] + '.mp3'
-    if os.path.isfile(filename) == False:
-        for x in os.listdir("res/audioclips/ow/"):
-            if x.startswith(message.content.split(' ')[1]):
-                filename = 'res/audioclips/ow/' + x
-                #yield from client.send_message(message.channel, filename)
-                break
-    if os.path.isfile(filename) == False:
-        filename = 'res/audioclips/wow/' + message.content.split(' ')[1] + '.mp3'
-    if os.path.isfile(filename) == False:
-        for x in os.listdir("res/audioclips/wow/"):
-            if x.startswith(message.content.split(' ')[1]):
-                filename = 'res/audioclips/wow' + x
-                #yield from client.send_message(message.channel, filename)
-                break
-    if os.path.isfile(filename) == False:
-        filename = 'res/audioclips/hs/' + message.content.split(' ')[1] + '.mp3'
-    if os.path.isfile(filename) == False:
-        for x in os.listdir("res/audioclips/hs/"):
-            if x.startswith(message.content.split(' ')[1]):
-                filename = 'res/audioclips/hs/' + x
-                #yield from client.send_message(message.channel, filename)
-                break
-    if os.path.isfile(filename) == False:
-        yield from client.send_message(message.channel, 'Voice clip not found. RIP.')
+        
+        filename = getline(message.content.split(' ')[1])
+        if(filename == None):
+            yield from client.send_message(message.channel, 'Voice clip not found. RIP.')
+    
     elif message.author.voice_channel != None and client.voice_client_in(message.server) == None: #author is in vchat bot isnt
         voice_client = yield from client.join_voice_channel(message.author.voice_channel)
 
@@ -154,8 +132,40 @@ def say(message):
         yield from voice_clip(voice_client, filename)
         yield from voice_client.move_to(prev_channel);
 
+def getline(name):
+    filename = 'res/audioclips/' + name + '.mp3' #check for direct address
+    if os.path.isfile(filename) == False:
+        filename = 'res/audioclips/ow/' + name + '.mp3'
+    if os.path.isfile(filename) == False:
+        for x in os.listdir("res/audioclips/ow/"):
+            if x.startswith(name):
+                filename = 'res/audioclips/ow/' + x
+                #yield from client.send_message(message.channel, filename)
+                break
+    if os.path.isfile(filename) == False:
+        filename = 'res/audioclips/wow/' + name + '.mp3'
+    if os.path.isfile(filename) == False:
+        for x in os.listdir("res/audioclips/wow/"):
+            if x.startswith(name):
+                filename = 'res/audioclips/wow' + x
+                #yield from client.send_message(message.channel, filename)
+                break
+    if os.path.isfile(filename) == False:
+        filename = 'res/audioclips/hs/' + name + '.mp3'
+    if os.path.isfile(filename) == False:
+        for x in os.listdir("res/audioclips/hs/"):
+            if x.startswith(name):
+                filename = 'res/audioclips/hs/' + x
+                #yield from client.send_message(message.channel, filename)
+                break
+    if os.path.isfile(filename) == False:
+        filename = None
+
+    return filename
+
 def listlines(dir):
     return ' \\ '.join(x.replace('.mp3', '') for x in os.listdir(dir))
+    
 def voice_clip(voice_client, filename):
     global use_avconv
     with(yield from player_lock):
