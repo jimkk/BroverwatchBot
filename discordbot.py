@@ -89,6 +89,8 @@ def on_voice_state_update(before, after):
     global tts_flag
     global enabled
     if enabled and not client.user == before: #the updated user is not the bot
+        if before.voice_channel == after.voice_channel:
+            return
         if client.is_voice_connected(after.server):
             voice_client = client.voice_client_in(after.server)
             if voice_client.channel == after.voice_channel:
