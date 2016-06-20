@@ -115,7 +115,7 @@ def say(message):
         yield from client.send_message(message.channel, 'Please give a voice line: \"!bbsay <voiceline>\"')
         
     filename = getline(message.content.split(' ')[1])
-    yield from client.send_message(message.channel, filename)
+    #yield from client.send_message(message.channel, filename)
     if(filename == None):
         yield from client.send_message(message.channel, 'Voice clip not found. RIP.')
     elif message.author.voice_channel != None and client.voice_client_in(message.server) == None: #author is in vchat bot isnt
