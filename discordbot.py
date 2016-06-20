@@ -27,7 +27,8 @@ helpmsg = """ COMMAND LIST:
 >!bbleave / !leavevoice    -    Remove bot from vchat
 >!bboff / !goaway    -    Disable the bot
 >!bbsay <line>    -    Say a line in current channel
->!bbnickname <nickname>    -    Set TTS nickname"""
+>!bbnickname <nickname>    -    Set TTS nickname
+>!bbcleanup    -    Removes all useless messages in last 100"""
 
 @client.event
 @asyncio.coroutine
@@ -189,10 +190,10 @@ def load_nicknames():
         pkl_file.close()
             
 def cleanup(message):
-    yield from purge_from(message.channel, limit=100,check=isbbsay)
+    yield from client.purge_from(message.channel, limit=100,check=isbbsay)
 
 def isbbsay(message):
-    yield from return message.startswith('!bbsay')
+    return message.content.startswith('!bbsay')
 
 if(os.environ.get('DISCORD_TOKEN') == None):
     token = input("You must specify the discord bot token: ")
