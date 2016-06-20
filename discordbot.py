@@ -27,7 +27,8 @@ helpmsg = """ COMMAND LIST:
 >!bbleave / !leavevoice    -    Remove bot from vchat
 >!bboff / !goaway    -    Disable the bot
 >!bbsay <line>    -    Say a line in current channel
->!bbnickname <nickname>    -    Set TTS nickname"""
+>!bbnickname <nickname>    -    Set TTS nickname
+>!bbcleanup    -    Removes all useless messages in last 100"""
 
 @client.event
 @asyncio.coroutine
@@ -83,7 +84,8 @@ def on_message(message):
             yield from client.send_message(message.channel, 'Overwatch: \n' + listlines("res/audioclips/ow"))
             yield from client.send_message(message.channel, 'Wow: \n' + listlines("res/audioclips/wow"))
             yield from client.send_message(message.channel, 'Hearthstone: \n' + listlines("res/audioclips/hs"))
-
+        elif (message.content.startswith('!bbcleanup')):
+            yield from cleanup(message)
 @client.event
 @asyncio.coroutine
 def on_voice_state_update(before, after):
@@ -115,7 +117,7 @@ def say(message):
         filename = getline(message.content.split(' ')[1])
         if(filename == None):
             yield from client.send_message(message.channel, 'Voice clip not found. RIP.')
-    
+            
     elif message.author.voice_channel != None and client.voice_client_in(message.server) == None: #author is in vchat bot isnt
         voice_client = yield from client.join_voice_channel(message.author.voice_channel)
 
@@ -165,7 +167,7 @@ def getline(name):
 
 def listlines(dir):
     return ' \\ '.join(x.replace('.mp3', '') for x in os.listdir(dir))
-    
+
 def voice_clip(voice_client, filename):
     global use_avconv
     with(yield from player_lock):
@@ -198,6 +200,11 @@ def load_nicknames():
         nicknames = pickle.load(pkl_file)
         pkl_file.close()
             
+def cleanup(message):
+    yield from client.purge_from(message.channel, limit=100,check=isbbsay)
+
+def isbbsay(message):
+    return message.content.startswith('!bbsay')
 
 if(os.environ.get('DISCORD_TOKEN') == None):
     token = input("You must specify the discord bot token: ")
