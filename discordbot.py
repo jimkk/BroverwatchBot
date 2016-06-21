@@ -115,7 +115,9 @@ def say(message):
         yield from client.send_message(message.channel, 'Please give a voice line: \"!bbsay <voiceline>\"')
         return
     
-    line = message.content.split(' ')[1]
+    line = message.content.split(' ', 1)[1]
+    line.replace(' ', '/', 1)
+    line = line.split(' ')[1]
     path = ''
     if(len(line.split('/')) > 1):
         path = line.rsplit('/',1)[0] + '/' #reverse split at last slash
