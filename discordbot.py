@@ -117,7 +117,7 @@ def say(message):
     
     line = message.content.split(' ', 1)[1]
     line.replace(' ', '/', 1)
-    line = line.split(' ')[1]
+    line = line.split(' ')[0]
     path = ''
     if(len(line.split('/')) > 1):
         path = line.rsplit('/',1)[0] + '/' #reverse split at last slash
