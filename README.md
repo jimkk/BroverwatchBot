@@ -26,6 +26,8 @@ COMMAND LIST:
 
 >!bbnickname <nickname>    -    Set TTS nickname
 
+>!bbcleanup <num>   -    Removes all useless messages in last <num> (default: 25)
+
 
 Future possible commands:
 

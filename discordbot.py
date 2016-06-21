@@ -28,7 +28,7 @@ helpmsg = """ COMMAND LIST:
 >!bboff / !goaway    -    Disable the bot
 >!bbsay <line>    -    Say a line in current channel
 >!bbnickname <nickname>    -    Set TTS nickname
->!bbcleanup    -    Removes all useless messages in last 100"""
+>!bbcleanup <num>   -    Removes all useless messages in last <num> (default: 25)"""
 
 @client.event
 @asyncio.coroutine
@@ -201,10 +201,25 @@ def load_nicknames():
         pkl_file.close()
             
 def cleanup(message):
-    yield from client.purge_from(message.channel, limit=100,check=isbbsay)
+    num = 25
+    if(len(message.content.split(' ')) > 1):
+        num = int(message.content.split(' ')[1])
+        if num > 100
+            num = 100
+    yield from client.purge_from(message.channel, limit=num,check=isuseless)
 
-def isbbsay(message):
-    return message.content.startswith('!bbsay')
+def isuseless(message):
+    if message.content.startswith('!bbsay'): #remove bbsay commands
+        return True
+    elif message.content.startswith('Voice clip not found. RIP.'): #remove failed bbsay responses
+        return True
+    elif message.content.startswith('Please give a voice line:'): #remove failed bbsay responses
+        return True
+    elif message.content.startswith('COMMAND LIST:'): #remove bb / bbhelp responses
+        return True
+    elif message.content.startswith('!bb ') or message.content.equals('!bb') or message.content.startswith('!bbhelp'): #remove bbhelp and bb commands
+        return True
+    return False
 
 if(os.environ.get('DISCORD_TOKEN') == None):
     token = input("You must specify the discord bot token: ")
