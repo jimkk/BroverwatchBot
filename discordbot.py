@@ -204,7 +204,7 @@ def cleanup(message):
     num = 25
     if(len(message.content.split(' ')) > 1):
         num = int(message.content.split(' ')[1])
-        if num > 100
+        if num > 100:
             num = 100
     yield from client.purge_from(message.channel, limit=num,check=isuseless)
 
@@ -215,9 +215,19 @@ def isuseless(message):
         return True
     elif message.content.startswith('Please give a voice line:'): #remove failed bbsay responses
         return True
-    elif message.content.startswith('COMMAND LIST:'): #remove bb / bbhelp responses
+    elif message.content.startswith(' COMMAND LIST:'): #remove bb / bbhelp responses
         return True
-    elif message.content.startswith('!bb ') or message.content.equals('!bb') or message.content.startswith('!bbhelp'): #remove bbhelp and bb commands
+    elif message.content.startswith('!bb ') or message.content == '!bb' or message.content.startswith('!bbhelp'): #remove bbhelp and bb commands
+        return True
+    elif message.content.startswith('!bbcleanup'): #remove bbcleanup commands
+        return True
+    elif message.content.startswith('!bbmyson'): #remove bbmyson commands
+        return True
+    elif message.content.startswith('Overwatch:') and message.author == client.user: #remove bbmyson output
+        return True
+    elif message.content.startswith('Wow:') and message.author == client.user: #remove bbmyson output
+        return True
+    elif message.content.startswith('Hearthstone:') and message.author == client.user: #remove bbmyson output
         return True
     return False
 
