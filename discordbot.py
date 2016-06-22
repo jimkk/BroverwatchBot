@@ -30,7 +30,8 @@ helpmsg = """ COMMAND LIST:
 >!bboff / !goaway    -    Disable the bot
 >!bbsay <line>    -    Say a line in current channel
 >!bbnickname <nickname>    -    Set TTS nickname
->!bbcleanup <num>   -    Removes all useless messages in last <num> (default: 25)"""
+>!bbcleanup <num>   -    Removes all useless messages in last <num> (default: 25)
+>!bbwiki <searchterm>    -    Links the Overwatch Wikipage for <searchterm>"""
 
 @client.event
 @asyncio.coroutine

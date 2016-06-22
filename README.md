@@ -28,6 +28,8 @@ COMMAND LIST:
 
 >!bbcleanup <num>   -    Removes all useless messages in last <num> (default: 25)
 
+>!bbwiki <searchterm>    -    Links the Overwatch Wikipage for <searchterm>
+
 
 Future possible commands:
 
