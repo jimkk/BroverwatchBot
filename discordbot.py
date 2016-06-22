@@ -53,7 +53,7 @@ def on_message(message):
             yield from client.send_message(message.channel, helpmsg)
     elif enabled:
         if message.content.startswith('!bbsay'):
-            yield from say(message)           
+            yield from say(message)        
         elif (message.content.startswith('!shutup') or message.content.startswith('!bbmute')):
             tts_flag = False
             yield from client.send_message(message.channel, 'I will go quietly into that good night')
@@ -113,8 +113,18 @@ def on_voice_state_update(before, after):
 def say(message):
     if(len(message.content.split(' ')) == 1):
         yield from client.send_message(message.channel, 'Please give a voice line: \"!bbsay <voiceline>\"')
-        
-    filename = getline(message.content.split(' ')[1])
+        return
+    
+    line = message.content.split(' ', 1)[1]
+    line.replace(' ', '/', 1)
+    line = line.split(' ')[0]
+    path = ''
+    if(len(line.split('/')) > 1):
+        path = line.rsplit('/',1)[0] + '/' #reverse split at last slash
+        line = line.rsplit('/',1)[1]       #reverse split at last slash
+
+    filename = getline(line, path)
+    #debugging message
     #yield from client.send_message(message.channel, filename)
     if(filename == None):
         yield from client.send_message(message.channel, 'Voice clip not found. RIP.')
@@ -134,36 +144,32 @@ def say(message):
         yield from voice_clip(voice_client, filename)
         yield from voice_client.move_to(prev_channel);
 
-def getline(name):
-    filename = 'res/audioclips/' + name + '.mp3' #check for direct address
-    if os.path.isfile(filename) == False:
-        filename = 'res/audioclips/ow/' + name + '.mp3'
-    if os.path.isfile(filename) == False:
-        for x in os.listdir("res/audioclips/ow/"):
-            if x.startswith(name):
-                filename = 'res/audioclips/ow/' + x
-                #yield from client.send_message(message.channel, filename)
-                break
-    if os.path.isfile(filename) == False:
-        filename = 'res/audioclips/wow/' + name + '.mp3'
-    if os.path.isfile(filename) == False:
-        for x in os.listdir("res/audioclips/wow/"):
-            if x.startswith(name):
-                filename = 'res/audioclips/wow/' + x
-                #yield from client.send_message(message.channel, filename)
-                break
-    if os.path.isfile(filename) == False:
-        filename = 'res/audioclips/hs/' + name + '.mp3'
-    if os.path.isfile(filename) == False:
-        for x in os.listdir("res/audioclips/hs/"):
-            if x.startswith(name):
-                filename = 'res/audioclips/hs/' + x
-                #yield from client.send_message(message.channel, filename)
-                break
-    if os.path.isfile(filename) == False:
-        filename = None
+def getline(name, path):
+    root = 'res/audioclips/' + path
+    filename = searchdir(name, root, True)
 
+    if filename == None:
+        filename = searchdir(name, root, False)
+    
     return filename
+
+def searchdir(name, root, strict):
+    #recursive: search dir for file, then search all subdir
+    #if strict == False, return anything that has a filename starting with name
+    filename = root + name + '.mp3'
+    if os.path.isfile(filename) == True:
+        return filename
+    for x in os.listdir(root):
+        #debug searching message
+        #print(x + " starts with " + name + " ?")
+        if x.startswith(name) and strict == False:
+            return root + x
+    for x in os.listdir(root):
+        if os.path.isdir(root + x):
+            subsearch = searchdir(name, (root + x + '/'), strict)
+            if subsearch != None:
+                return subsearch
+    return None
 
 def listlines(dir):
     return ' \\ '.join(x.replace('.mp3', '') for x in os.listdir(dir))
