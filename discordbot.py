@@ -249,7 +249,6 @@ def wikisearch(message):
         return
     searchterm = message.content.split(' ', 1)[1];
     searchterm.replace(' ', '+')
-    #var = requests.get((r'https://duckduckgo.com/?q=!+' + searchterm + "+site:overwatch.wikia.com"))
     var = requests.get((r'http://www.google.com/search?btnI=I%27m+Feeling+Lucky&ie=UTF-8&oe=UTF-8&q=' + searchterm + r'+site:overwatch.gamepedia.com'))
     
     url = var.url
@@ -258,8 +257,7 @@ def wikisearch(message):
         return
 
     soup = BeautifulSoup(var.text, "html.parser")
-    #print(BeautifulSoup.prettify(soup).encode('utf-8').strip())
-    print(url)
+    #print(url)
     if(len(soup.findAll('div', attrs={'class':'g'})) == 0):
         #print(str(var.is_redirect))
         yield from client.send_message(message.channel, 'No results found. RIP.')
