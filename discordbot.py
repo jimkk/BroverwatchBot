@@ -212,6 +212,7 @@ def cleanup(message):
         num = int(message.content.split(' ')[1])
         if num > 100:
             num = 100
+    print("Purging last " + str(num) + " messages from " + message.channel.name + " channel")
     yield from client.purge_from(message.channel, limit=num,check=isuseless)
 
 def isuseless(message):
@@ -241,5 +242,8 @@ if(os.environ.get('DISCORD_TOKEN') == None):
     token = input("You must specify the discord bot token: ")
     os.environ['DISCORD_TOKEN'] = token
 
-
-client.run(os.environ.get('DISCORD_TOKEN'))
+while(True):
+    try:
+        client.run(os.environ.get('DISCORD_TOKEN'))
+    except discord.errors.ConnectionClosed:
+        print("ConnectionClosed error. Restarting")
