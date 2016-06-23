@@ -7,6 +7,7 @@ import os
 import pickle
 import urllib.request
 import requests
+from bs4 import BeautifulSoup
 
 client = discord.Client()
 
@@ -248,15 +249,30 @@ def wikisearch(message):
         return
     searchterm = message.content.split(' ', 1)[1];
     searchterm.replace(' ', '+')
-    var = requests.get((r'https://duckduckgo.com/?q=!+' + searchterm + "+site:overwatch.wikia.com"))
-    #var = requests.get((r'https://google.ca/?q=' + searchterm + r'+site:overwatch.wikia.com&btnI=I'))
-    url = var.text
-    if(len(url.split('uddg=',1))>1):
-        url = url.split('uddg=',1)[1]
-        url = url.split('\'>')[0]
-        url = urllib.request.unquote(url)
-    #print(str(var.links) + " " + str(var.is_redirect) + " " + str(var.text))
-    if(not url.startswith('http://overwatch.wikia.com')):
+    #var = requests.get((r'https://duckduckgo.com/?q=!+' + searchterm + "+site:overwatch.wikia.com"))
+    var = requests.get((r'http://www.google.com/search?btnI=I%27m+Feeling+Lucky&ie=UTF-8&oe=UTF-8&q=' + searchterm + r'+site:overwatch.gamepedia.com'))
+    
+    url = var.url
+    if(url.startswith('http://overwatch.gamepedia.com')):
+        yield from client.send_message(message.channel, url)
+        return
+
+    soup = BeautifulSoup(var.text, "html.parser")
+    #print(BeautifulSoup.prettify(soup).encode('utf-8').strip())
+    print(url)
+    if(len(soup.findAll('div', attrs={'class':'g'})) == 0):
+        #print(str(var.is_redirect))
+        yield from client.send_message(message.channel, 'No results found. RIP.')
+        return
+    #print(str(soup.findAll('div', attrs={'class':'g'})[0]).encode('utf-8').strip())
+    #print(str(soup.findAll('div', attrs={'class':'g'})[0].find('a')).encode('utf-8').strip())
+    #print(str(soup.findAll('div', attrs={'class':'g'})[0].find('a')['href']).encode('utf-8').strip())
+    url = str(soup.findAll('div', attrs={'class':'g'})[0].find('a')['href'])
+    url = url.replace(r'/url?q=', '')
+    url = url.rsplit('&')[0]
+    #print(url)
+    if(not url.startswith('http://overwatch.gamepedia.com')):
+        print(url)
         yield from client.send_message(message.channel, 'No results found. RIP.')
         return
     yield from client.send_message(message.channel, url)
