@@ -51,10 +51,11 @@ def on_message(message):
     global tts_flag
     global enabled
 
-    if(message.author.name in blacklist):
+    if(message.author.id in blacklist):
         #nothing should happen if a user is in the blacklist
         if (message.content.startswith('!bb')):
             #yield from client.send_message(message.channel, message.author.mention + "https://giphy.com/gifs/naru-13r5cLwRjhteQE")
+            print(message.author.name + " tried to say \""+message.content+"\" but is blacklisted")
         return
     elif (message.content.startswith('!gogogadgetbot') or message.content.startswith('!bbon')):
         yield from client.send_message(message.channel, 'It\'s a me, Broverwatch Bot!')
@@ -230,10 +231,11 @@ def load_nicknames():
 def add_to_blacklist(username):
     global blacklist
     added = False
-    if username in blacklist:
-        blacklist.remove(username)
+    user_id = get_id(username)
+    if user_id in blacklist:
+        blacklist.remove(user_id)
     else:
-        blacklist.append(username)
+        blacklist.append(user_id)
         added = True
     pkl_file = open('data/blacklist.pkl', 'wb')
     pickle.dump(blacklist, pkl_file)
@@ -241,13 +243,18 @@ def add_to_blacklist(username):
 
     return added
 
-
 def load_blacklist():
     global blacklist
     if(os.path.isfile('data/blacklist.pkl') == True):
         pkl_file = open('data/blacklist.pkl', 'rb')
         blacklist = pickle.load(pkl_file)
         pkl_file.close()
+
+def get_id(username):
+    members = client.get_all_members()
+    for member in members:
+        if member.name == username:
+            return member.id
 
 def set_admin_channel(channel):
     global admin_channel
