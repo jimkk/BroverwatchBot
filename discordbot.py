@@ -5,6 +5,7 @@ from gtts import gTTS
 from tempfile import NamedTemporaryFile
 import os
 import pickle
+import cowsay
 import urllib.request
 import requests
 from bs4 import BeautifulSoup
@@ -32,6 +33,7 @@ helpmsg = """ COMMAND LIST:
 >!bbsay <line>    -    Say a line in current channel
 >!bbnickname <nickname>    -    Set TTS nickname
 >!bbcleanup <num>   -    Removes all useless messages in last <num> (default: 25)
+>!bbcowsay <words>   -    Say it with a cow
 >!bbwiki <searchterm>    -    Links the Overwatch Wikipage for <searchterm>"""
 
 @client.event
@@ -90,8 +92,11 @@ def on_message(message):
             yield from client.send_message(message.channel, 'Hearthstone: \n' + listlines("res/audioclips/hs"))
         elif (message.content.startswith('!bbcleanup')):
             yield from cleanup(message)
+        elif (message.content.startswith('!bbcowsay')):
+            yield from bbcowsay(message)
         elif (message.content.startswith('!bbwiki')):
             yield from wikisearch(message)
+
 @client.event
 @asyncio.coroutine
 def on_voice_state_update(before, after):
@@ -243,6 +248,15 @@ def isuseless(message):
     elif message.content.startswith('Hearthstone:') and message.author == client.user: #remove bbmyson output
         return True
     return False
+
+def bbcowsay(message):
+    if(len(message.content.split(' ',1)) == 1):
+        yield from client.send_message(message.channel, 'Give him something to say: \"!bbcowsay <words>\"')
+        return
+    text = message.content.split(' ',1)[1]
+    #three backticks (``` on the tilde key) creates a code block thank you discord devs
+    yield from client.send_message(message.channel, "```" + cowsay.cowsay(text)+"```")
+    #print("\n" + cowsay.cowsay(text))
 
 def wikisearch(message):
     if(len(message.content.split(' ')) == 1):

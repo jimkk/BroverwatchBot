@@ -28,12 +28,13 @@ COMMAND LIST:
 
 >!bbcleanup <num>   -    Removes all useless messages in last <num> (default: 25)
 
+>!bbcowsay <words>   -    Say it with a cow
+
 >!bbwiki <searchterm>    -    Links the Overwatch Wikipage for <searchterm>
 
 
-Future possible commands:
 
-cowsay (winstonsay?)
+Future possible commands:
 
 youtube searching
 
