@@ -5,13 +5,10 @@ from gtts import gTTS
 from tempfile import NamedTemporaryFile
 import os
 import pickle
-<<<<<<< HEAD
 import cowsay
-=======
 import urllib.request
 import requests
 from bs4 import BeautifulSoup
->>>>>>> master
 
 client = discord.Client()
 
