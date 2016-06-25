@@ -17,10 +17,12 @@ tts_lock = asyncio.Lock()
 
 enabled = True
 message_channel = None
+admin_channel = None
 tts_flag = False
 use_avconv = True
 
 nicknames = {}
+blacklist = []
 
 helpmsg = """ COMMAND LIST:
 >!bbhelp / !bb    -    Display help message
@@ -44,15 +46,24 @@ def on_ready():
     print(client.user.id)
     print('------')
     load_nicknames()
+    load_blacklist()
+    load_admin_channel()
 
 @client.event
 @asyncio.coroutine
 def on_message(message):
     global message_channel
+    global admin_channel
     global tts_flag
     global enabled
 
-    if (message.content.startswith('!gogogadgetbot') or message.content.startswith('!bbon')):
+    if(message.author.id in blacklist):
+        #nothing should happen if a user is in the blacklist
+        if (message.content.startswith('!bb')):
+            #yield from client.send_message(message.channel, message.author.mention + "https://giphy.com/gifs/naru-13r5cLwRjhteQE")
+            print(message.author.name + " tried to say \""+message.content+"\" but is blacklisted")
+        return
+    elif (message.content.startswith('!gogogadgetbot') or message.content.startswith('!bbon')):
         yield from client.send_message(message.channel, 'It\'s a me, Broverwatch Bot!')
         enabled = True
     elif (message.content.startswith('!bbhelp') or message.content.startswith('!bb ') or message.content == '!bb'):
@@ -92,6 +103,17 @@ def on_message(message):
             yield from client.send_message(message.channel, 'Hearthstone: \n' + listlines("res/audioclips/hs"))
         elif (message.content.startswith('!bbcleanup')):
             yield from cleanup(message)
+        elif message.channel.id == admin_channel or admin_channel == None:
+            if message.content.startswith('!bbsetadminchannel'):
+                set_admin_channel(message.channel)
+                yield from client.send_message(message.channel, 'This channel is now the admin channel')
+            elif message.content.startswith('!bbblacklist'):
+                username = message.content.split(" ")[1]
+                added = add_to_blacklist(username)
+                if added:
+                    yield from client.send_message(message.channel, "Added " +  username + " to blacklist")
+                else:
+                    yield from client.send_message(message.channel, "Removed " +  username + " from blacklist")
         elif (message.content.startswith('!bbcowsay')):
             yield from bbcowsay(message)
         elif (message.content.startswith('!bbwiki')):
@@ -215,6 +237,51 @@ def load_nicknames():
     if(os.path.isfile('data/nicknames.pkl') == True):
         pkl_file = open('data/nicknames.pkl', 'rb')
         nicknames = pickle.load(pkl_file)
+        pkl_file.close()
+
+def add_to_blacklist(username):
+    global blacklist
+    added = False
+    user_id = get_id(username)
+    if user_id in blacklist:
+        blacklist.remove(user_id)
+    else:
+        blacklist.append(user_id)
+        added = True
+    pkl_file = open('data/blacklist.pkl', 'wb')
+    pickle.dump(blacklist, pkl_file)
+    pkl_file.close()
+
+    return added
+
+def load_blacklist():
+    global blacklist
+    if(os.path.isfile('data/blacklist.pkl') == True):
+        pkl_file = open('data/blacklist.pkl', 'rb')
+        blacklist = pickle.load(pkl_file)
+        pkl_file.close()
+
+def get_id(identifier):
+    #given id or username returns a matching id
+    members = client.get_all_members()
+    for member in members:
+        if member.name == identifier:
+            return member.id
+        if member.id == identifier:
+            return identifier
+
+def set_admin_channel(channel):
+    global admin_channel
+    admin_channel = channel.id
+    pkl_file = open('data/admin.pkl', 'wb')
+    pickle.dump(admin_channel, pkl_file)
+    pkl_file.close()
+
+def load_admin_channel():
+    global admin_channel
+    if(os.path.isfile('data/admin.pkl') == True):
+        pkl_file = open('data/admin.pkl', 'rb')
+        admin_channel = pickle.load(pkl_file)
         pkl_file.close()
             
 def cleanup(message):
