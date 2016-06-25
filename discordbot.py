@@ -261,11 +261,14 @@ def load_blacklist():
         blacklist = pickle.load(pkl_file)
         pkl_file.close()
 
-def get_id(username):
+def get_id(identifier):
+    #given id or username returns a matching id
     members = client.get_all_members()
     for member in members:
-        if member.name == username:
+        if member.name == identifier:
             return member.id
+        if member.id == identifier:
+            return identifier
 
 def set_admin_channel(channel):
     global admin_channel
