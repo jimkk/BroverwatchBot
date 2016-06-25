@@ -103,21 +103,20 @@ def on_message(message):
             yield from client.send_message(message.channel, 'Hearthstone: \n' + listlines("res/audioclips/hs"))
         elif (message.content.startswith('!bbcleanup')):
             yield from cleanup(message)
-        elif message.channel.id == admin_channel or admin_channel == None:
-            if message.content.startswith('!bbsetadminchannel'):
-                set_admin_channel(message.channel)
-                yield from client.send_message(message.channel, 'This channel is now the admin channel')
-            elif message.content.startswith('!bbblacklist'):
-                username = message.content.split(" ")[1]
-                added = add_to_blacklist(username)
-                if added:
-                    yield from client.send_message(message.channel, "Added " +  username + " to blacklist")
-                else:
-                    yield from client.send_message(message.channel, "Removed " +  username + " from blacklist")
         elif (message.content.startswith('!bbcowsay')):
             yield from bbcowsay(message)
         elif (message.content.startswith('!bbwiki')):
             yield from wikisearch(message)
+        elif message.content.startswith('!bbsetadminchannel') and admin_channel == None:
+            set_admin_channel(message.channel)
+            yield from client.send_message(message.channel, 'This channel is now the admin channel') 
+        elif message.channel.id == admin_channel and message.content.startswith('!bbblacklist'):
+            username = message.content.split(" ")[1]
+            added = add_to_blacklist(username)
+            if added:
+                yield from client.send_message(message.channel, "Added " +  username + " to blacklist")
+            else:
+                yield from client.send_message(message.channel, "Removed " +  username + " from blacklist")
 
 @client.event
 @asyncio.coroutine
