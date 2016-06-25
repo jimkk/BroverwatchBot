@@ -5,6 +5,10 @@ from gtts import gTTS
 from tempfile import NamedTemporaryFile
 import os
 import pickle
+import cowsay
+import urllib.request
+import requests
+from bs4 import BeautifulSoup
 
 client = discord.Client()
 
@@ -30,7 +34,9 @@ helpmsg = """ COMMAND LIST:
 >!bboff / !goaway    -    Disable the bot
 >!bbsay <line>    -    Say a line in current channel
 >!bbnickname <nickname>    -    Set TTS nickname
->!bbcleanup <num>   -    Removes all useless messages in last <num> (default: 25)"""
+>!bbcleanup <num>   -    Removes all useless messages in last <num> (default: 25)
+>!bbcowsay <words>   -    Say it with a cow
+>!bbwiki <searchterm>    -    Links the Overwatch Wikipage for <searchterm>"""
 
 @client.event
 @asyncio.coroutine
@@ -108,6 +114,11 @@ def on_message(message):
                     yield from client.send_message(message.channel, "Added " +  username + " to blacklist")
                 else:
                     yield from client.send_message(message.channel, "Removed " +  username + " from blacklist")
+        elif (message.content.startswith('!bbcowsay')):
+            yield from bbcowsay(message)
+        elif (message.content.startswith('!bbwiki')):
+            yield from wikisearch(message)
+
 @client.event
 @asyncio.coroutine
 def on_voice_state_update(before, after):
@@ -276,6 +287,7 @@ def cleanup(message):
         num = int(message.content.split(' ')[1])
         if num > 100:
             num = 100
+    print("Purging last " + str(num) + " messages from " + message.channel.name + " channel")
     yield from client.purge_from(message.channel, limit=num,check=isuseless)
 
 def isuseless(message):
@@ -301,9 +313,53 @@ def isuseless(message):
         return True
     return False
 
+def bbcowsay(message):
+    if(len(message.content.split(' ',1)) == 1):
+        yield from client.send_message(message.channel, 'Give him something to say: \"!bbcowsay <words>\"')
+        return
+    text = message.content.split(' ',1)[1]
+    #three backticks (``` on the tilde key) creates a code block thank you discord devs
+    yield from client.send_message(message.channel, "```" + cowsay.cowsay(text)+"```")
+    #print("\n" + cowsay.cowsay(text))
+
+def wikisearch(message):
+    if(len(message.content.split(' ')) == 1):
+        yield from client.send_message(message.channel, 'Please give a search term: \"!bbwiki <searchterm>\"')
+        return
+    searchterm = message.content.split(' ', 1)[1];
+    searchterm.replace(' ', '+')
+    var = requests.get((r'http://www.google.com/search?btnI=I%27m+Feeling+Lucky&ie=UTF-8&oe=UTF-8&q=' + searchterm + r'+site:overwatch.gamepedia.com'))
+    
+    url = var.url
+    if(url.startswith('http://overwatch.gamepedia.com')):
+        yield from client.send_message(message.channel, url)
+        return
+
+    soup = BeautifulSoup(var.text, "html.parser")
+    #print(url)
+    if(len(soup.findAll('div', attrs={'class':'g'})) == 0):
+        #print(str(var.is_redirect))
+        yield from client.send_message(message.channel, 'No results found. RIP.')
+        return
+    #print(str(soup.findAll('div', attrs={'class':'g'})[0]).encode('utf-8').strip())
+    #print(str(soup.findAll('div', attrs={'class':'g'})[0].find('a')).encode('utf-8').strip())
+    #print(str(soup.findAll('div', attrs={'class':'g'})[0].find('a')['href']).encode('utf-8').strip())
+    url = str(soup.findAll('div', attrs={'class':'g'})[0].find('a')['href'])
+    url = url.replace(r'/url?q=', '')
+    url = url.rsplit('&')[0]
+    #print(url)
+    if(not url.startswith('http://overwatch.gamepedia.com')):
+        print(url)
+        yield from client.send_message(message.channel, 'No results found. RIP.')
+        return
+    yield from client.send_message(message.channel, url)
+
 if(os.environ.get('DISCORD_TOKEN') == None):
     token = input("You must specify the discord bot token: ")
     os.environ['DISCORD_TOKEN'] = token
 
-
-client.run(os.environ.get('DISCORD_TOKEN'))
+while(True):
+    try:
+        client.run(os.environ.get('DISCORD_TOKEN'))
+    except ConnectionClosed:
+        print("ConnectionClosed error. Restarting")

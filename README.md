@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/jimkk/BroverwatchBot.svg?branch=master)](https://travis-ci.org/jimkk/BroverwatchBot)
 
-A discord bot for announcing when users join and leave a voice channel
+A discord bot for announcing when users join and leave a voice channel and playing voice lines.
 
 Add to server using: https://discordapp.com/oauth2/authorize?client_id=190904410862387200&scope=bot&permissions=0
 
@@ -28,10 +28,13 @@ COMMAND LIST:
 
 >!bbcleanup <num>   -    Removes all useless messages in last <num> (default: 25)
 
+>!bbcowsay <words>   -    Say it with a cow
+
+>!bbwiki <searchterm>    -    Links the Overwatch Wikipage for <searchterm>
+
+
 
 Future possible commands:
-
-cowsay (winstonsay?)
 
 youtube searching
 
