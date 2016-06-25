@@ -30,10 +30,11 @@ COMMAND LIST:
 
 >!bbcowsay <words>   -    Say it with a cow
 
+>!bbwiki <searchterm>    -    Links the Overwatch Wikipage for <searchterm>
+
+
 
 Future possible commands:
-
-cowsay (winstonsay?)
 
 youtube searching
 
