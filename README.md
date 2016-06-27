@@ -38,11 +38,7 @@ Future possible commands:
 
 youtube searching
 
-Overwatch wiki searching
-
 bnet ID storing
-
-character specific commands to list damage of their moves?
 
 an "about" command
 

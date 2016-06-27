@@ -141,6 +141,8 @@ def on_voice_state_update(before, after):
                     yield from tts_voice_clip(voice_client, nicknames[before.id] + ' has left')
                 else:
                     yield from tts_voice_clip(voice_client, after.name + ' has left')
+    if client.is_voice_connected(before.server) and before.voice_channel == client.voice_client_in(before.server) and len(before.voice_channel.voice_members) == 1:
+        yield from client.voice_client_in(before.server).disconnect()
                 
 def say(message):
     if(len(message.content.split(' ')) == 1):
