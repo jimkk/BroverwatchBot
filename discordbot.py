@@ -92,8 +92,11 @@ def on_message(message):
             else:
                 yield from client.join_voice_channel(message.author.voice_channel)
         elif (message.content.startswith('!leavevoice') or message.content.startswith('!bbleave')):
+            print("Leaving voice for " + message.server.name + " server")
             if client.is_voice_connected(message.server):
                 yield from client.voice_client_in(message.server).disconnect()
+            else:
+                print("ERROR: Not connected to voice channel in this server")
         elif (message.content.startswith('!goaway') or message.content.startswith('!bboff')):
             yield from client.send_message(message.channel, 'Ok, going away')
             enabled = False
