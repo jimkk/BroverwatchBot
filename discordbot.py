@@ -362,5 +362,5 @@ if(os.environ.get('DISCORD_TOKEN') == None):
 while(True):
     try:
         client.run(os.environ.get('DISCORD_TOKEN'))
-    except ConnectionClosed:
+    except discord.ConnectionClosed:
         print("ConnectionClosed error. Restarting")
