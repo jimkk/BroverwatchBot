@@ -9,7 +9,7 @@ import cowsay
 import urllib.request
 import requests
 from bs4 import BeautifulSoup
-from shuutil import copyfile
+from shutil import copyfile
 import datetime
 
 client = discord.Client()
@@ -59,7 +59,9 @@ def on_message(message):
     global tts_flag
     global enabled
 
-    yield from log("["+message.server.name+"/"+message.channel.name+"] " + message.author.name + ": " + message.content)
+    #print(message.author.name)
+    #print(message.content)
+    log("["+message.server.name+"/"+message.channel.name+"] " + message.author.name + ": " + message.content)
     if(message.author.id in blacklist):
         #nothing should happen if a user is in the blacklist
         if (message.content.startswith('!bb')):
@@ -68,23 +70,23 @@ def on_message(message):
         return
     elif (message.content.startswith('!gogogadgetbot') or message.content.startswith('!bbon')):
         yield from client.send_message(message.channel, 'It\'s a me, Broverwatch Bot!')
-        yield from log("Bot enabled by " + message.author.name);
+        log("Bot enabled by " + message.author.name);
         enabled = True
     elif (message.content.startswith('!bbhelp') or message.content.startswith('!bb ') or message.content == '!bb'):
             yield from client.send_message(message.channel, helpmsg)
-            yield from log("Bot help message requested by " + message.author.name);
+            log("Bot help message requested by " + message.author.name);
     elif enabled:
         if message.content.startswith('!bbsay'):
-            yield from log("Audio line request by " + message.author.name);
+            log("Audio line request by " + message.author.name);
             yield from say(message)        
         elif (message.content.startswith('!shutup') or message.content.startswith('!bbmute')):
             tts_flag = False
             yield from client.send_message(message.channel, 'I will go quietly into that good night')
-            yield from log("Bot muted by " + message.author.name);
+            log("Bot muted by " + message.author.name);
         elif (message.content.startswith('!speakup') or message.content.startswith('!bbunmute')):
             tts_flag = True
             yield from client.send_message(message.channel, 'I will not go quietly into that good night')
-            yield from log("Bot unmuted by " + message.author.name);
+            log("Bot unmuted by " + message.author.name);
         elif message.content.startswith('!bbnickname'):
             if len(message.content.split(' ')) < 2:
                 yield from client.send_message(message.channel, 'Bad formatting: !bbnickname <nickname>')
@@ -98,39 +100,39 @@ def on_message(message):
                 yield from client.send_message(message.channel,
                 message.author.mention + ' You are not in a voice channel')
             else:
-                yield from log("Bot joining voice with " + message.author.name);
+                log("Bot joining voice with " + message.author.name);
                 yield from client.join_voice_channel(message.author.voice_channel)
         elif (message.content.startswith('!leavevoice') or message.content.startswith('!bbleave')):
             print("Leaving voice for " + message.server.name + " server")
-            yield from log("Bot leaving voice for " + message.author.name);
+            log("Bot leaving voice for " + message.author.name);
             if client.is_voice_connected(message.server):
                 yield from client.voice_client_in(message.server).disconnect()
             else:
                 print("ERROR: Not connected to voice channel in this server")
         elif (message.content.startswith('!goaway') or message.content.startswith('!bboff')):
-            yield from log("Bot disabled by " + message.author.name);
+            log("Bot disabled by " + message.author.name);
             yield from client.send_message(message.channel, 'Ok, going away')
             enabled = False
         elif (message.content.startswith('!bbmyson')):
-            yield from log("Bot audiolist requested by " + message.author.name);
+            log("Bot audiolist requested by " + message.author.name);
             yield from client.send_message(message.channel, 'Overwatch: \n' + listlines("res/audioclips/ow"))
             yield from client.send_message(message.channel, 'Wow: \n' + listlines("res/audioclips/wow"))
             yield from client.send_message(message.channel, 'Hearthstone: \n' + listlines("res/audioclips/hs"))
         elif (message.content.startswith('!bbcleanup')):
-            yield from log("Cleanup requested by " + message.author.name);
+            log("Cleanup requested by " + message.author.name);
             yield from cleanup(message)
         elif (message.content.startswith('!bbcowsay')):
-            yield from log("Cowsay by " + message.author.name);
+            log("Cowsay by " + message.author.name);
             yield from bbcowsay(message)
         elif (message.content.startswith('!bbwiki')):
-            yield from log("Wiki search by " + message.author.name);
+            log("Wiki search by " + message.author.name);
             yield from wikisearch(message)
         elif message.content.startswith('!bbsetadminchannel') and admin_channel == None:
-            yield from log("Admin channel set by " + message.author.name);
+            log("Admin channel set by " + message.author.name);
             set_admin_channel(message.channel)
             yield from client.send_message(message.channel, 'This channel is now the admin channel') 
         elif message.channel.id == admin_channel and message.content.startswith('!bbblacklist'):
-            yield from log("Blacklist requested by " + message.author.name);
+            log("Blacklist requested by " + message.author.name);
             username = message.content.split(" ")[1]
             added = add_to_blacklist(username)
             if added:
@@ -138,7 +140,7 @@ def on_message(message):
             else:
                 yield from client.send_message(message.channel, "Removed " +  username + " from blacklist")
         elif message.channel.id == admin_channel and message.content.startswith('!bblogdump'):
-            yield from log("Log dump requested by " + message.author.name);
+            log("Log dump requested by " + message.author.name);
             yield from dump_log()
 
 @client.event
@@ -376,7 +378,7 @@ def wikisearch(message):
     yield from client.send_message(message.channel, url)
 
 def log(message):
-    if(!os.path.isfile("data/log")):
+    if(not os.path.isfile("data/log")):
         logfile = open("data/log","w")
         logfile.close
     with open("data/log", "a") as logfile:
