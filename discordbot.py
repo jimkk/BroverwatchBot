@@ -59,7 +59,7 @@ def on_message(message):
     global tts_flag
     global enabled
 
-    yield from log("["+message.server.name+"/"message.channel.name+"] "+message.author.name + ": "+message.content);
+    yield from log("["+message.server.name+"/"+message.channel.name+"] " + message.author.name + ": " + message.content)
     if(message.author.id in blacklist):
         #nothing should happen if a user is in the blacklist
         if (message.content.startswith('!bb')):
