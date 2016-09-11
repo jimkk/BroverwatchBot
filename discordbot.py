@@ -38,7 +38,8 @@ helpmsg = """ COMMAND LIST:
 >!bbnickname <nickname>    -    Set TTS nickname
 >!bbcleanup <num>   -    Removes all useless messages in last <num> (default: 25)
 >!bbcowsay <words>   -    Say it with a cow
->!bbwiki <searchterm>    -    Links the Overwatch Wikipage for <searchterm>"""
+>!bbwiki <searchterm>    -    Links the Overwatch Wikipage for <searchterm>
+>!bbsr <int>    -    Stores your current rating"""
 
 @client.event
 @asyncio.coroutine
@@ -127,6 +128,13 @@ def on_message(message):
         elif (message.content.startswith('!bbwiki')):
             log("Wiki search by " + message.author.name)
             yield from wikisearch(message)
+        elif (message.content.startswith('!bbsr')):
+            log("Rating stored by " + message.author.name)
+            yield from success = store_rating(message)
+            if(not success):
+                yield from client.send_message(message.channel, 'Rating store failed.')
+            else:
+                yield from client.send_message(message.channel, get_rating_change(message.author.id))
         elif message.content.startswith('!bbsetadminchannel') and admin_channel == None:
             log("Admin channel set by " + message.author.name)
             set_admin_channel(message.channel)
@@ -385,6 +393,42 @@ def log(message):
     with open("data/log", "a") as logfile:
         logfile.write(datetime.datetime.now().isoformat() + " " + message+"\n")
         logfile.close()
+
+def store_rating(message):
+    filename = "data/ratings/"+message.author.id
+    text = message.content.replace("!bbsr ","")
+        
+    try:
+        rating = int(text)
+    except ValueError:
+        return False
+    if(rating < 0 || rating > 5000)
+        return False
+
+    if(not os.path.isdir("data/ratings")):
+        os.makedirs("data/ratings")
+    if(not os.path.isfile(filename)):
+        ratingfile = open(filename, "w")
+        ratingfile.close()
+    with open(filename, "a") as ratingfile
+        ratingfile.write(datetime.datetime.now().isoformat() + " " + rating+"\n")
+        ratingfile.close()
+
+    return True
+
+def get_rating_change(userid):
+    filename = "data/ratings/"+userid
+    with open(filename, "r") as ratingfile:
+        array = []
+        for line in ratingfile:
+            array.append(line.split()[1])
+
+    if(array.len() == 1)
+        return "This was your first submitted rating."
+    currentrating = int(array[array.len()-1])
+    oldrating = int(array[array.len()-2])
+    message = "Your old rating was "+ oldrating + ". This was a change of " + (currentrating-oldrating) + "."
+    return message
 
 def dump_log():
     copyfile("data/log", "data/dump")
