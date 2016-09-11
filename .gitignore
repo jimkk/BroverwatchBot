@@ -3,3 +3,5 @@ data/*
 !data/*.txt
 build/
 __pycache__/
+*.sh
+

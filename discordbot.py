@@ -130,7 +130,7 @@ def on_message(message):
             yield from wikisearch(message)
         elif (message.content.startswith('!bbsr')):
             log("Rating stored by " + message.author.name)
-            yield from success = store_rating(message)
+            success = yield from store_rating(message)
             if(not success):
                 yield from client.send_message(message.channel, 'Rating store failed.')
             else:
@@ -402,7 +402,7 @@ def store_rating(message):
         rating = int(text)
     except ValueError:
         return False
-    if(rating < 0 || rating > 5000)
+    if(rating < 0 or rating > 5000):
         return False
 
     if(not os.path.isdir("data/ratings")):
@@ -410,7 +410,7 @@ def store_rating(message):
     if(not os.path.isfile(filename)):
         ratingfile = open(filename, "w")
         ratingfile.close()
-    with open(filename, "a") as ratingfile
+    with open(filename, "a") as ratingfile:
         ratingfile.write(datetime.datetime.now().isoformat() + " " + rating+"\n")
         ratingfile.close()
 
@@ -423,7 +423,7 @@ def get_rating_change(userid):
         for line in ratingfile:
             array.append(line.split()[1])
 
-    if(array.len() == 1)
+    if(array.len() == 1):
         return "This was your first submitted rating."
     currentrating = int(array[array.len()-1])
     oldrating = int(array[array.len()-2])
