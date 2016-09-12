@@ -11,6 +11,9 @@ import requests
 from bs4 import BeautifulSoup
 from shutil import copyfile
 import datetime
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plot
 
 client = discord.Client()
 
@@ -135,6 +138,11 @@ def on_message(message):
                 yield from client.send_message(message.channel, 'Rating store failed.')
             else:
                 yield from client.send_message(message.channel, get_rating_change(message.author.id))
+        elif (message.content.startswith('!bbplotsr')):
+            ret = plot_rating(message.author.id)
+            if(ret):
+                yield from client.send_file(message.channel, "data/plot.png")
+                os.remove("data/plot.png")
         elif message.content.startswith('!bbsetadminchannel') and admin_channel == None:
             log("Admin channel set by " + message.author.name)
             set_admin_channel(message.channel)
@@ -429,6 +437,29 @@ def get_rating_change(userid):
     oldrating = int(array[len(array)-2])
     message = "Your old rating was "+ str(oldrating) + ". This was a change of " + str(currentrating-oldrating) + "."
     return message
+
+def plot_rating(userid):
+    filename = "data/ratings/" + userid
+    if(not os.path.isfile(filename)):
+        return False
+    datelist = []
+    ratings = []
+    with open(filename, "r") as ratingfile:
+        for line in ratingfile:
+            datelist.append(line.split()[0])
+            ratings.append(line.split()[1])
+    if(len(datelist) < 2):
+        return False
+    dates = [datetime.datetime.strptime(i, '%Y-%m-%dT%H:%M:%S.%f') for i in datelist]
+    fig = plot.figure()
+    ax = fig.add_subplot(111)
+    for xy in zip(dates, ratings):
+        ax.annotate('%s' % xy[1], xy=xy, textcoords='data')
+    ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%Y/%m/%d %H:%M"))
+    ax.plot(dates, ratings)
+    fig.autofmt_xdate()
+    plot.savefig("data/plot.png")
+    return True
 
 def dump_log():
     copyfile("data/log", "data/dump")
