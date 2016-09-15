@@ -139,7 +139,11 @@ def on_message(message):
             else:
                 yield from client.send_message(message.channel, get_rating_change(message.author.id))
         elif (message.content.startswith('!bbplotsr')):
-            ret = plot_rating(message.author.id)
+            ret = False
+            if(len(message.content.split()) == 1 or message.content.split()[1].startswith('g')):
+                ret = plot_rating_game(message.author.id)
+            elif message.content.split()[1].startswith('d'):
+                ret = plot_rating_date(message.author.id)
             if(ret):
                 yield from client.send_file(message.channel, "data/plot.png")
                 os.remove("data/plot.png")
@@ -438,7 +442,7 @@ def get_rating_change(userid):
     message = "Your old rating was "+ str(oldrating) + ". This was a change of " + str(currentrating-oldrating) + "."
     return message
 
-def plot_rating(userid):
+def plot_rating_date(userid):
     filename = "data/ratings/" + userid
     if(not os.path.isfile(filename)):
         return False
@@ -453,11 +457,35 @@ def plot_rating(userid):
     dates = [datetime.datetime.strptime(i, '%Y-%m-%dT%H:%M:%S.%f') for i in datelist]
     fig = plot.figure()
     ax = fig.add_subplot(111)
-    for xy in zip(dates, ratings):
-        ax.annotate('%s' % xy[1], xy=xy, textcoords='data')
+    if(len(ratings)<20):
+        for xy in zip(dates, ratings):
+            ax.annotate('%s' % xy[1], xy=xy, textcoords='data')
     ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%Y/%m/%d %H:%M"))
     ax.plot(dates, ratings)
     fig.autofmt_xdate()
+    plot.savefig("data/plot.png")
+    return True
+
+def plot_rating_game(userid):
+    filename = "data/ratings/" + userid
+    if(not os.path.isfile(filename)):
+        return False
+    index = []
+    ratings = []
+    with open(filename, "r") as ratingfile:
+        for line in ratingfile:
+            ratings.append(line.split()[1])
+    if(len(ratings) < 2):
+        return False
+    index = range(len(ratings))
+    fig = plot.figure()
+    ax = fig.add_subplot(111)
+    if(len(ratings)<20):
+        for xy in zip(index, ratings):
+            ax.annotate('%s' % xy[1], xy=xy, textcoords='data')
+    #ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%Y/%m/%d %H:%M"))
+    ax.plot(index, ratings)
+    #fig.autofmt_xdate()
     plot.savefig("data/plot.png")
     return True
 
