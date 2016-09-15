@@ -151,9 +151,9 @@ def on_message(message):
                 os.remove("data/plot.png")
         elif (message.content.startswith('!bbundosr')):
             ret = undo_rating_entry(message.author.id)
-            if(ret)
+            if(ret):
                 yield from client.send_message(message.channel, 'Last rating deleted.')
-            else
+            else:
                 yield from client.send_message(message.channel, 'Rating not deleted. Your file may be empty or nonexistent.')
         elif message.content.startswith('!bbsetadminchannel') and admin_channel == None:
             log("Admin channel set by " + message.author.name)
@@ -504,12 +504,12 @@ def undo_rating_entry(userid):
     file = open(filename, "r");
     lines = file.readlines()
     file.close()
-    if(len(lines)==0)
+    if(len(lines)==0):
         return False
     lines = lines[:-1]
-    file = (filename, "w")
-    for line in lines
-        file.writeline(line)
+    file = open(filename, "w")
+    for line in lines:
+        file.write(line)
     return True
 
 def dump_log():
