@@ -42,7 +42,9 @@ helpmsg = """ COMMAND LIST:
 >!bbcleanup <num>   -    Removes all useless messages in last <num> (default: 25)
 >!bbcowsay <words>   -    Say it with a cow
 >!bbwiki <searchterm>    -    Links the Overwatch Wikipage for <searchterm>
->!bbsr <int>    -    Stores your current rating"""
+>!bbsr <int>    -    Stores your current rating
+>!bbplotsr  <date/game>    -    Show a graph of your rating (by date or by game)
+>!bbundosr    -    Remove your last entered Skill Rating"""
 
 @client.event
 @asyncio.coroutine
@@ -147,6 +149,12 @@ def on_message(message):
             if(ret):
                 yield from client.send_file(message.channel, "data/plot.png")
                 os.remove("data/plot.png")
+        elif (message.content.startswith('!bbundosr')):
+            ret = undo_rating_entry(message.author.id)
+            if(ret)
+                yield from client.send_message(message.channel, 'Last rating deleted.')
+            else
+                yield from client.send_message(message.channel, 'Rating not deleted. Your file may be empty or nonexistent.')
         elif message.content.startswith('!bbsetadminchannel') and admin_channel == None:
             log("Admin channel set by " + message.author.name)
             set_admin_channel(message.channel)
@@ -487,6 +495,21 @@ def plot_rating_game(userid):
     ax.plot(index, ratings)
     #fig.autofmt_xdate()
     plot.savefig("data/plot.png")
+    return True
+
+def undo_rating_entry(userid):
+    filename = "data/ratings/" + userid
+    if(not os.path.isfile(filename)):
+        return False
+    file = open(filename, "r");
+    lines = file.readlines()
+    file.close()
+    if(len(lines)==0)
+        return False
+    lines = lines[:-1]
+    file = (filename, "w")
+    for line in lines
+        file.writeline(line)
     return True
 
 def dump_log():
