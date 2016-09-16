@@ -451,9 +451,6 @@ def get_rating_change(userid):
     return message
 
 def plot_rating_date(userid, name):
-    plot.xlabel('Date')
-    plot.ylabel('Skill Rating')
-    plot.title(name + '\'s Skill Rating')
     filename = "data/ratings/" + userid
     if(not os.path.isfile(filename)):
         return False
@@ -467,6 +464,9 @@ def plot_rating_date(userid, name):
         return False
     dates = [datetime.datetime.strptime(i, '%Y-%m-%dT%H:%M:%S.%f') for i in datelist]
     fig = plot.figure()
+    plot.xlabel('Date')
+    plot.ylabel('Skill Rating')
+    fig.suptitle(name + '\'s Skill Rating')
     ax = fig.add_subplot(111)
     if(len(ratings)<20):
         for xy in zip(dates, ratings):
@@ -474,8 +474,8 @@ def plot_rating_date(userid, name):
     else:
         interval = len(ratings)/20
         index = 0.0
-        points = zip(dates, ratings)
-        while(index < len(ratings)):
+        points = list(zip(dates, ratings))
+        while(round(index) < len(ratings)):
             ax.annotate('%s' % points[int(round(index))][1], xy=points[int(round(index))], textcoords='data')
             index = index + interval
     ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%Y/%m/%d %H:%M"))
@@ -485,34 +485,34 @@ def plot_rating_date(userid, name):
     return True
 
 def plot_rating_game(userid, name):
-    plot.xlabel('Games')
-    plot.ylabel('Skill Rating')
-    plot.title(name + '\'s Skill Rating')
     filename = "data/ratings/" + userid
     if(not os.path.isfile(filename)):
         return False
-    index = []
+    indexes = []
     ratings = []
     with open(filename, "r") as ratingfile:
         for line in ratingfile:
             ratings.append(line.split()[1])
     if(len(ratings) < 2):
         return False
-    index = range(len(ratings))
+    indexes = range(len(ratings))
     fig = plot.figure()
+    fig.suptitle(name + '\'s Skill Rating')
+    plot.ylabel('Skill Rating')
+    plot.xlabel('Games')
     ax = fig.add_subplot(111)
     if(len(ratings)<20):
-        for xy in zip(index, ratings):
+        for xy in zip(indexes, ratings):
             ax.annotate('%s' % xy[1], xy=xy, textcoords='data')
     else:
         interval = len(ratings)/20
         index = 0.0
-        points = zip(dates, ratings)
-        while(index < len(ratings)):
+        points = list(zip(indexes, ratings))
+        while(round(index) < len(ratings)):
             ax.annotate('%s' % points[int(round(index))][1], xy=points[int(round(index))], textcoords='data')
             index = index + interval
     #ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%Y/%m/%d %H:%M"))
-    ax.plot(index, ratings)
+    ax.plot(indexes, ratings)
     #fig.autofmt_xdate()
     plot.savefig("data/plot.png")
     return True
