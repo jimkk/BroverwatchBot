@@ -479,7 +479,7 @@ def plot_rating_date(userid, name):
             ax.annotate('%s' % points[int(round(index))][1], xy=points[int(round(index))], textcoords='data')
             index = index + interval
     ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%Y/%m/%d %H:%M"))
-    ax.plot(dates, ratings)
+    ax.plot(dates, ratings, marker='.')
     fig.autofmt_xdate()
     plot.savefig("data/plot.png")
     return True
@@ -512,7 +512,7 @@ def plot_rating_game(userid, name):
             ax.annotate('%s' % points[int(round(index))][1], xy=points[int(round(index))], textcoords='data')
             index = index + interval
     #ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%Y/%m/%d %H:%M"))
-    ax.plot(indexes, ratings)
+    ax.plot(indexes, ratings, marker='.')
     #fig.autofmt_xdate()
     plot.savefig("data/plot.png")
     return True
