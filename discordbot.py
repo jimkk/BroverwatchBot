@@ -143,9 +143,9 @@ def on_message(message):
         elif (message.content.startswith('!bbplotsr')):
             ret = False
             if(len(message.content.split()) == 1 or message.content.split()[1].startswith('g')):
-                ret = plot_rating_game(message.author.id)
+                ret = plot_rating_game(message.author.id, message.author.name)
             elif message.content.split()[1].startswith('d'):
-                ret = plot_rating_date(message.author.id)
+                ret = plot_rating_date(message.author.id, message.author.name)
             if(ret):
                 yield from client.send_file(message.channel, "data/plot.png")
                 os.remove("data/plot.png")
@@ -450,7 +450,10 @@ def get_rating_change(userid):
     message = "Your old rating was "+ str(oldrating) + ". This was a change of " + str(currentrating-oldrating) + "."
     return message
 
-def plot_rating_date(userid):
+def plot_rating_date(userid, name):
+    plot.xlabel('Date')
+    plot.ylabel('Skill Rating')
+    plot.title(name + '\'s Skill Rating')
     filename = "data/ratings/" + userid
     if(not os.path.isfile(filename)):
         return False
@@ -468,13 +471,23 @@ def plot_rating_date(userid):
     if(len(ratings)<20):
         for xy in zip(dates, ratings):
             ax.annotate('%s' % xy[1], xy=xy, textcoords='data')
+    else:
+        interval = len(ratings)/20
+        index = 0.0
+        points = zip(dates, ratings)
+        while(index < len(ratings)):
+            ax.annotate('%s' % points[int(round(index))][1], xy=points[int(round(index))], textcoords='data')
+            index = index + interval
     ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%Y/%m/%d %H:%M"))
     ax.plot(dates, ratings)
     fig.autofmt_xdate()
     plot.savefig("data/plot.png")
     return True
 
-def plot_rating_game(userid):
+def plot_rating_game(userid, name):
+    plot.xlabel('Games')
+    plot.ylabel('Skill Rating')
+    plot.title(name + '\'s Skill Rating')
     filename = "data/ratings/" + userid
     if(not os.path.isfile(filename)):
         return False
@@ -491,6 +504,13 @@ def plot_rating_game(userid):
     if(len(ratings)<20):
         for xy in zip(index, ratings):
             ax.annotate('%s' % xy[1], xy=xy, textcoords='data')
+    else:
+        interval = len(ratings)/20
+        index = 0.0
+        points = zip(dates, ratings)
+        while(index < len(ratings)):
+            ax.annotate('%s' % points[int(round(index))][1], xy=points[int(round(index))], textcoords='data')
+            index = index + interval
     #ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%Y/%m/%d %H:%M"))
     ax.plot(index, ratings)
     #fig.autofmt_xdate()
