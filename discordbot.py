@@ -472,10 +472,10 @@ def plot_rating_date(userid, name):
         for xy in zip(dates, ratings):
             ax.annotate('%s' % xy[1], xy=xy, textcoords='data')
     else:
-        interval = len(ratings)/20
+        interval = (len(ratings)-1)/20
         index = 0.0
         points = list(zip(dates, ratings))
-        while(round(index) < len(ratings)):
+        while(index < len(ratings)):
             ax.annotate('%s' % points[int(round(index))][1], xy=points[int(round(index))], textcoords='data')
             index = index + interval
     ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%Y/%m/%d %H:%M"))
@@ -505,10 +505,10 @@ def plot_rating_game(userid, name):
         for xy in zip(indexes, ratings):
             ax.annotate('%s' % xy[1], xy=xy, textcoords='data')
     else:
-        interval = len(ratings)/20
+        interval = (len(ratings)-1)/20
         index = 0.0
         points = list(zip(indexes, ratings))
-        while(round(index) < len(ratings)):
+        while(index < len(ratings)):
             ax.annotate('%s' % points[int(round(index))][1], xy=points[int(round(index))], textcoords='data')
             index = index + interval
     #ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%Y/%m/%d %H:%M"))
