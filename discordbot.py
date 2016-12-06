@@ -63,8 +63,8 @@ def on_ready():
     #global currentPlayers
     #global rank_loop
     #get_current_rank('161603549917216768')
-    currentPlayers.append('161603549917216768')
-    rank_loop.call_soon(get_ranks, rank_loop)
+    #currentPlayers.append('161603549917216768')
+    #rank_loop.call_soon(get_ranks, rank_loop)
 
 @client.event
 @asyncio.coroutine
@@ -259,7 +259,7 @@ def get_ranks(loop):
             with open(filename, "a") as ratingfile:
                 ratingfile.write(datetime.datetime.now().isoformat() + " " + rank+"\n")
                 ratingfile.close()
-    loop.call_later(600, get_ranks, loop)
+    loop.call_later(3600, get_ranks, loop)
    
 def get_current_rank(discord_id):
     filename = "data/ratings/" + discord_id
