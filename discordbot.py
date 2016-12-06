@@ -14,6 +14,7 @@ import datetime
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plot
+from getrank import get_rank
 
 client = discord.Client()
 
@@ -28,6 +29,10 @@ use_avconv = True
 
 nicknames = {}
 blacklist = []
+
+battletags = {}
+currentPlayers = []
+rank_loop = asyncio.get_event_loop()
 
 helpmsg = """ COMMAND LIST:
 >!bbhelp / !bb    -    Display help message
@@ -52,8 +57,14 @@ def on_ready():
     print(client.user.id)
     print('------')
     load_nicknames()
+    load_battletags()
     load_blacklist()
     load_admin_channel()
+    #global currentPlayers
+    #global rank_loop
+    #get_current_rank('161603549917216768')
+    currentPlayers.append('161603549917216768')
+    rank_loop.call_soon(get_ranks, rank_loop)
 
 @client.event
 @asyncio.coroutine
@@ -62,6 +73,9 @@ def on_message(message):
     global admin_channel
     global tts_flag
     global enabled
+    global battletags
+    global currentPlayers
+    global rank_loop
 
     #print(message.author.name)
     #print(message.content)
@@ -158,6 +172,15 @@ def on_message(message):
         elif message.channel.id == admin_channel and message.content.startswith('!bblogdump'):
             log("Log dump requested by " + message.author.name)
             yield from dump_log()
+        elif message.content.startswith('!bbtag'):
+            tag = message.content.split(' ')[1]
+            set_battletag(message.author, tag)
+            if message.author.game == "Overwatch" and message.author.id not in currentPlayers:
+                currentPlayers.append(message.author.id)
+                if len(currentPlayers) == 1:
+                    rank_loop.call_soon(get_ranks, rank_loop)
+            yield from client.send_message(message.channel, message.author.mention +
+                "Updated your battletag to '" + tag + "'")
 
 @client.event
 @asyncio.coroutine
@@ -185,7 +208,73 @@ def on_voice_state_update(before, after):
                     yield from tts_voice_clip(voice_client, after.name + ' has left')
     if client.is_voice_connected(before.server) and before.voice_channel == client.voice_client_in(before.server) and len(before.voice_channel.voice_members) == 1:
         yield from client.voice_client_in(before.server).disconnect()
+
+@client.event
+@asyncio.coroutine
+def on_member_update(before, after):
+    global currentPlayers
+    global battletags
+    global rank_loop
+    if before.server.id == '179075529276653568':
+        if before.game != after.game:
+            if after.game != None and after.game.name == 'Overwatch':
+                print(after.name + ' has started playing Overwatch')
+                print(battletags)
+                print(after.id)
+                if after.id in battletags:
+                    print("\tBattletag known")
+                    if after.id not in currentPlayers:
+                        print("\tAdded to current players")
+                        currentPlayers.append(after.id)
+                        if len(currentPlayers) == 1:
+                            rank_loop.call_soon(get_ranks, rank_loop)
+            elif before.game != None and before.game.name == 'Overwatch':
+                print(after.name + ' has stopped playing Overwatch')
+                if before.id in currentPlayers:
+                    currentPlayers.remove(before.id)
+                    print("Removed " + after.name + " from current players")
                 
+def get_ranks(loop):
+    global currentPlayers
+    print("Gettings ranks")
+    if len(currentPlayers) == 0:
+        print("No current players")
+        return
+    for player in currentPlayers:
+        print("Getting rank for " + player)
+        rank = get_rank(battletags[player])
+        if rank == None:
+            print(player + " is unranked")
+        else:
+            if rank == get_current_rank(player):
+                print("Rating hasn't changed")
+                continue
+            filename = "data/ratings/"+ player
+
+            if(not os.path.isdir("data/ratings")):
+                os.makedirs("data/ratings")
+            if(not os.path.isfile(filename)):
+                ratingfile = open(filename, "w")
+                ratingfile.close()
+            with open(filename, "a") as ratingfile:
+                ratingfile.write(datetime.datetime.now().isoformat() + " " + rank+"\n")
+                ratingfile.close()
+    loop.call_later(600, get_ranks, loop)
+   
+def get_current_rank(discord_id):
+    filename = "data/ratings/" + discord_id
+    if not os.path.isfile(filename):
+        return None
+    else:
+        ratingfile = open(filename, "r")
+        lastline = ""
+        line = ratingfile.readline()
+        while(line != ""):
+            lastline = line
+            line = ratingfile.readline()
+        current_rank = lastline.split(" ")[-1].replace('\n', '')
+        return current_rank
+
 def say(message):
     if(len(message.content.split(' ')) == 1):
         yield from client.send_message(message.channel, 'Please give a voice line: \"!bbsay <voiceline>\"')
@@ -302,6 +391,20 @@ def load_blacklist():
     if(os.path.isfile('data/blacklist.pkl') == True):
         pkl_file = open('data/blacklist.pkl', 'rb')
         blacklist = pickle.load(pkl_file)
+        pkl_file.close()
+
+def set_battletag(user, tag):
+    global battletags
+    battletags[user.id] = tag
+    pkl_file = open('data/battletags.pkl', 'wb')
+    pickle.dump(battletags, pkl_file)
+    pkl_file.close()
+
+def load_battletags():
+    global battletags
+    if(os.path.isfile('data/battletags.pkl') == True):
+        pkl_file = open('data/battletags.pkl', 'rb')
+        battletags = pickle.load(pkl_file)
         pkl_file.close()
 
 def get_id(identifier):
