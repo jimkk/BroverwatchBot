@@ -233,6 +233,7 @@ def on_member_update(before, after):
                 if before.id in currentPlayers:
                     currentPlayers.remove(before.id)
                     print("Removed " + after.name + " from current players")
+                    rank_loop.call_later(60*60*3, get_ranks, rank_loop) 
                 
 def get_ranks(loop):
     global currentPlayers
